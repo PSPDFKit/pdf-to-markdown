@@ -1,50 +1,13 @@
 # Nutrient PDF to Markdown
 
-Turn PDFs into structured, semantic Markdown for AI workflows.
+**Stop wasting your context window on PDF extraction.**
 
-Nutrient's PDF-to-Markdown extractor is built for Claude, Codex, RAG pipelines, and document-heavy automation where raw PDF text is not good enough. The goal is simple: start with clean Markdown instead of noisy extraction that burns context window, adds cleanup work, and makes downstream results less reliable.
+Fast, accurate Markdown from PDFs — locally, with no cleanup required. Built for Claude, Codex, RAG pipelines, and document-heavy automation where noisy extraction burns tokens and makes downstream results less reliable.
 
-This repo is the shareable CLI home for that workflow. The extraction engine itself is distributed as a proprietary signed binary and runs locally on the user's machine. The `nutrient-skills` marketplace repo remains the right place to install the agent skill.
-
-## Overview
-
-Good PDF-to-Markdown extraction is not just text scraping. For AI workflows, it needs to preserve reading order, headings, lists, and tables well enough that the output can be used directly in prompts, indexing pipelines, or agent tasks.
-
-Nutrient focuses on the tradeoff the website calls out most clearly: speed and accuracy should not fight each other. The current benchmark snapshot shows strong structure quality, very fast extraction time per page, and a large speed advantage over several popular alternatives.
-
-The trust model is also intentionally simple:
-
-- documents stay in your local workflow and are not uploaded to Nutrient by this extractor
-- the CLI is free for up to `1,000` documents per calendar month
-- the public repo stays small and reviewable because the proprietary engine is shipped separately as signed binaries
-
-## Why This Repo Exists
-
-`nutrient-skills` is optimized for agent marketplace distribution.
-
-This repo is optimized for:
-
-- a dedicated CLI landing page
-- direct install instructions
-- npm-style CLI packaging without publishing the extractor source
-- product benchmarks and trust details in one README
-- a stable link to send when someone asks for "the PDF-to-Markdown CLI"
-
-## What You Get
-
-- `bin/pdf-to-markdown`: thin wrapper that downloads the current platform binary from the Nutrient CDN and executes it locally
-- `install.sh`: installer for `~/.local/bin/pdf-to-markdown`
-- `package.json`: CLI package metadata so the repo can be installed or published like a normal command-line tool
-- [docs/benchmarks.md](/Users/admin/Projects/pdf-to-markdown/docs/benchmarks.md): benchmark values currently published on the Nutrient site
-- [docs/distribution-model.md](/Users/admin/Projects/pdf-to-markdown/docs/distribution-model.md): what stays public vs private
-
-## Platform Support
-
-The current wrapper supports:
-
-- macOS Apple Silicon (`Darwin/arm64`)
-- Linux x86_64
-- Linux arm64
+- **How fast is it?** — 0.008s per page. 176x faster than docling, 10x faster than opendataloader. ([benchmarks](#benchmarks))
+- **How accurate is it?** — 0.92 reading order (best in class), 0.88 overall extraction accuracy, 0.81 heading detection. ([benchmarks](#benchmarks))
+- **Where do my PDFs go?** — Nowhere. The CLI runs locally. Your documents are not uploaded to Nutrient. ([trust & licensing](#trust-and-licensing))
+- **What does it cost?** — Free for up to 1,000 documents per calendar month. ([license](LICENSE.md))
 
 ## Install
 
@@ -64,15 +27,13 @@ cd pdf-to-markdown
 ./install.sh
 ```
 
-### Install from the repo with npm
+### Install with npm
 
 ```bash
 git clone https://github.com/PSPDFKit/pdf-to-markdown.git
 cd pdf-to-markdown
 npm install -g .
 ```
-
-This works because the repository is packaged as a standard CLI wrapper even though the extraction engine itself is not in the repo.
 
 ## Usage
 
@@ -91,6 +52,12 @@ pdf-to-markdown ./input-pdfs ./output-markdown
 ```
 
 When both arguments are directories, the CLI converts every PDF in the input directory and writes matching Markdown files into the output directory.
+
+## Platform Support
+
+- macOS Apple Silicon (`Darwin/arm64`)
+- Linux x86_64
+- Linux arm64
 
 ## Benchmarks
 
@@ -134,29 +101,20 @@ Published benchmark values from [Nutrient's PDF-to-Markdown page](https://www.nu
 - `7x` faster than `pymupdf4llm`
 - `7x` faster than `markitdown`
 
-For the full comparison table, see [docs/benchmarks.md](/Users/admin/Projects/pdf-to-markdown/docs/benchmarks.md).
+For the full comparison table, see [docs/benchmarks.md](docs/benchmarks.md).
 
-## Trust And Licensing
+## Trust and Licensing
 
 - Free for up to `1,000` documents per calendar month
-- PDFs stay local to the CLI workflow and are not uploaded to Nutrient by this extractor
-- Commercial licensing is required for more than `1,000` documents per month, redistribution of the binary, or OEM/white-label use
+- PDFs stay local — your documents are not uploaded to Nutrient by this extractor
+- A commercial license is required for processing more than `1,000` documents per month
+- The extraction engine is delivered as a signed platform binary; the repo contains only the wrapper and documentation
 
-See [LICENSE.md](/Users/admin/Projects/pdf-to-markdown/LICENSE.md) for the current repo and binary terms.
-
-## Closed-Source By Design
-
-This repository is meant to be reviewable without exposing the extractor implementation.
-
-- The repo contains wrapper code, install surfaces, and documentation.
-- The proprietary engine is delivered as a signed platform binary from the Nutrient CDN.
-- Private build scripts, credentials, and engine source should never be checked into this repo.
-
-The detailed boundary is documented in [docs/distribution-model.md](/Users/admin/Projects/pdf-to-markdown/docs/distribution-model.md).
+See [LICENSE.md](LICENSE.md) for the full terms.
 
 ## Agent Skill
 
-If you want the same capability inside Claude Code, Codex, Cursor, or Gemini CLI, install the skill from the marketplace repo instead of using this CLI repo directly:
+If you want the same capability inside Claude Code, Codex, Cursor, or Gemini CLI, install the skill from the marketplace repo instead of using this CLI directly:
 
 ```bash
 npx skills add pspdfkit-labs/nutrient-skills --skill pdf-to-markdown
@@ -169,14 +127,20 @@ Or with marketplace/plugin flows:
 /plugin install pdf-to-markdown@nutrient-skills
 ```
 
-## How The Wrapper Works
+## FAQ
 
-`bin/pdf-to-markdown` is intentionally small:
+### What makes this different from other PDF extractors?
 
-1. Detect the current platform.
-2. Read the latest release id from the Nutrient CDN.
-3. Download the matching archive into `~/.local/share/nutrient/cli/`.
-4. Cache the installed binary and only re-check for updates every 6 hours.
-5. Execute the downloaded binary with the arguments you passed.
+Speed and accuracy should not be a tradeoff. Most extractors are either fast but lose structure (markitdown, pymupdf4llm) or accurate but slow (docling). Nutrient extracts at 0.008s per page with strong reading order, heading, and table preservation — less cleanup, fewer wasted tokens, and more reliable downstream results.
 
-That gives you a public repo and a stable CLI entrypoint without exposing the extraction engine source.
+### Do my documents leave my machine?
+
+No. The CLI processes PDFs locally. Nothing is uploaded to Nutrient. Note that if you feed the extracted Markdown into Claude, Codex, or another model provider, their own data policies apply.
+
+### How does licensing work?
+
+Free for up to 1,000 documents per calendar month. A commercial license is required above that threshold. See [LICENSE.md](LICENSE.md) for the full terms, or contact `sales@nutrient.io`.
+
+### Why is the extraction engine closed-source?
+
+The repo is designed to be reviewable — you can read the wrapper, the installer, and the documentation. The extraction engine is distributed as a signed binary to protect the implementation while keeping the CLI surface fully transparent.

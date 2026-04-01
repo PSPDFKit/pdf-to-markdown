@@ -38,12 +38,4 @@ These values mirror the benchmark figures currently published on Nutrient's PDF-
 
 ## Note
 
-This file intentionally reflects the currently published marketing benchmark table rather than a separate reproducibility harness.
-
-If you want this repository to stand up better against LiteParse in technical due diligence, the next step should be a public benchmark harness repo or a `benchmarks/` directory with:
-
-- dataset identifiers
-- exact scoring definitions
-- command lines for each competitor
-- raw result artifacts
-- rerun instructions
+This file reflects the currently published benchmark table. A public reproducibility harness is planned as a future addition.
