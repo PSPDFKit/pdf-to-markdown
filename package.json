@@ -1,0 +1,50 @@
+{
+  "name": "@pspdfkit/pdf-to-markdown",
+  "version": "0.1.0",
+  "description": "Standalone CLI wrapper for Nutrient's PDF-to-Markdown extractor",
+  "bin": {
+    "pdf-to-markdown": "./bin/pdf-to-markdown"
+  },
+  "files": [
+    "bin",
+    "docs",
+    "README.md",
+    "LICENSE.md",
+    "install.sh"
+  ],
+  "scripts": {
+    "check": "sh -n ./install.sh && sh -n ./bin/pdf-to-markdown",
+    "pack:dry-run": "npm pack --dry-run"
+  },
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "pdf",
+    "markdown",
+    "cli",
+    "nutrient",
+    "pspdfkit",
+    "document-processing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PSPDFKit/pdf-to-markdown.git"
+  },
+  "homepage": "https://github.com/PSPDFKit/pdf-to-markdown#readme",
+  "bugs": {
+    "url": "https://github.com/PSPDFKit/pdf-to-markdown/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "SEE LICENSE IN LICENSE.md"
+}
