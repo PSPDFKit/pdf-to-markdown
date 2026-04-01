@@ -11,7 +11,24 @@ Fast, accurate Markdown from PDFs — locally, with no cleanup required. Built f
 
 ## Install
 
-### Quick install
+### Agent skill (recommended)
+
+If you use Claude Code, Codex, Cursor, or Gemini CLI, install the [Nutrient Skills](https://github.com/pspdfkit-labs/nutrient-skills) plugin — the extraction runs automatically when your agent needs to read a PDF:
+
+```bash
+npx skills add pspdfkit-labs/nutrient-skills --skill pdf-to-markdown
+```
+
+Or with marketplace/plugin flows:
+
+```text
+/plugin marketplace add pspdfkit-labs/nutrient-skills
+/plugin install pdf-to-markdown@nutrient-skills
+```
+
+### Standalone CLI
+
+For use outside an agent, install the CLI directly:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/install.sh | sh
@@ -19,20 +36,12 @@ curl -fsSL https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/insta
 
 This installs `pdf-to-markdown` into `~/.local/bin` by default.
 
-### Install from a clone
+You can also install from a clone:
 
 ```bash
 git clone https://github.com/PSPDFKit/pdf-to-markdown.git
 cd pdf-to-markdown
-./install.sh
-```
-
-### Install with npm
-
-```bash
-git clone https://github.com/PSPDFKit/pdf-to-markdown.git
-cd pdf-to-markdown
-npm install -g .
+./install.sh            # or: npm install -g .
 ```
 
 ## Usage
@@ -111,21 +120,6 @@ For the full comparison table, see [docs/benchmarks.md](docs/benchmarks.md).
 - The extraction engine is delivered as a signed platform binary; the repo contains only the wrapper and documentation
 
 See [LICENSE.md](LICENSE.md) for the full terms.
-
-## Agent Skill
-
-If you want the same capability inside Claude Code, Codex, Cursor, or Gemini CLI, install the skill from the marketplace repo instead of using this CLI directly:
-
-```bash
-npx skills add pspdfkit-labs/nutrient-skills --skill pdf-to-markdown
-```
-
-Or with marketplace/plugin flows:
-
-```text
-/plugin marketplace add pspdfkit-labs/nutrient-skills
-/plugin install pdf-to-markdown@nutrient-skills
-```
 
 ## FAQ
 
