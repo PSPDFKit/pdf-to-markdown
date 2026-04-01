@@ -1,8 +1,22 @@
 # Nutrient PDF to Markdown
 
-Standalone CLI wrapper and product documentation for Nutrient's PDF-to-Markdown extractor.
+Turn PDFs into structured, semantic Markdown for AI workflows.
 
-This repo is the shareable entrypoint for the CLI. The extraction engine itself is distributed as a proprietary prebuilt binary and runs locally on the user's machine. The `nutrient-skills` marketplace repo remains the right place to install the agent skill.
+Nutrient's PDF-to-Markdown extractor is built for Claude, Codex, RAG pipelines, and document-heavy automation where raw PDF text is not good enough. The goal is simple: start with clean Markdown instead of noisy extraction that burns context window, adds cleanup work, and makes downstream results less reliable.
+
+This repo is the shareable CLI home for that workflow. The extraction engine itself is distributed as a proprietary signed binary and runs locally on the user's machine. The `nutrient-skills` marketplace repo remains the right place to install the agent skill.
+
+## Overview
+
+Good PDF-to-Markdown extraction is not just text scraping. For AI workflows, it needs to preserve reading order, headings, lists, and tables well enough that the output can be used directly in prompts, indexing pipelines, or agent tasks.
+
+Nutrient focuses on the tradeoff the website calls out most clearly: speed and accuracy should not fight each other. The current benchmark snapshot shows strong structure quality, very fast extraction time per page, and a large speed advantage over several popular alternatives.
+
+The trust model is also intentionally simple:
+
+- documents stay in your local workflow and are not uploaded to Nutrient by this extractor
+- the CLI is free for up to `1,000` documents per calendar month
+- the public repo stays small and reviewable because the proprietary engine is shipped separately as signed binaries
 
 ## Why This Repo Exists
 
