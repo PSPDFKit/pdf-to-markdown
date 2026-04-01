@@ -1,0 +1,32 @@
+<svg width="960" height="520" viewBox="0 0 960 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="520" rx="24" fill="#FCFAF6"/>
+  <text x="44" y="56" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Structure Quality</text>
+  <text x="44" y="84" fill="#6B625A" font-family="Arial, Helvetica, sans-serif" font-size="16">Two benchmark slices that matter most for document structure fidelity</text>
+
+  <text x="44" y="128" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">Table Structure (TEDS)</text>
+  <text x="44" y="160" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="600">docling</text>
+  <rect x="220" y="146" width="605" height="22" rx="11" fill="#2A2F39"/>
+  <text x="842" y="162" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="600">0.93</text>
+  <text x="44" y="198" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">Nutrient</text>
+  <rect x="220" y="184" width="429" height="22" rx="11" fill="#0E8F82"/>
+  <text x="842" y="200" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">0.66</text>
+  <text x="44" y="236" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="600">markitdown</text>
+  <rect x="220" y="222" width="4" height="22" rx="11" fill="#D4CDC4"/>
+  <text x="842" y="238" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="600">0.00</text>
+
+  <line x1="44" y1="280" x2="916" y2="280" stroke="#E5DED4" stroke-width="2"/>
+
+  <text x="44" y="328" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">Heading Level (MHS)</text>
+  <text x="44" y="360" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="600">docling</text>
+  <rect x="220" y="346" width="539" height="22" rx="11" fill="#2A2F39"/>
+  <text x="842" y="362" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="600">0.83</text>
+  <text x="44" y="398" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">Nutrient</text>
+  <rect x="220" y="384" width="526" height="22" rx="11" fill="#0E8F82"/>
+  <text x="842" y="400" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">0.81</text>
+  <text x="44" y="436" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="600">markitdown</text>
+  <rect x="220" y="422" width="4" height="22" rx="11" fill="#D4CDC4"/>
+  <text x="842" y="438" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="600">0.00</text>
+
+  <rect x="44" y="468" width="872" height="24" rx="12" fill="#F3EEE7"/>
+  <text x="62" y="485" fill="#6B625A" font-family="Arial, Helvetica, sans-serif" font-size="14">Nutrient stays close to the best heading scores while substantially outperforming MarkItDown on both structural metrics.</text>
+</svg>

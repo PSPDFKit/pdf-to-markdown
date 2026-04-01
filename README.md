@@ -82,6 +82,16 @@ When both arguments are directories, the CLI converts every PDF in the input dir
 
 Published benchmark values from [Nutrient's PDF-to-Markdown page](https://www.nutrient.io/ai/skills/pdf-to-markdown/), recorded on `AMD EPYC 9454`.
 
+### Visual Snapshot
+
+![Extraction accuracy benchmark](docs/assets/extraction-accuracy.svg)
+
+![Extraction speed benchmark](docs/assets/extraction-speed.svg)
+
+![Structure quality benchmark](docs/assets/structure-quality.svg)
+
+![Relative speedup benchmark](docs/assets/faster-with-nutrient.svg)
+
 ### Accuracy
 
 | Metric | Nutrient | Best competitor | MarkItDown |
