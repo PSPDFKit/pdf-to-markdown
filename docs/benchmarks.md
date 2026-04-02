@@ -1,41 +1,57 @@
 # Benchmarks
 
-These values mirror the benchmark figures currently published on Nutrient's PDF-to-Markdown product page:
+These values are from a reproducible benchmark run using the [opendataloader-bench](https://github.com/PSPDFKit-labs/opendataloader-bench) evaluation harness on 200 PDF documents with hand-annotated ground truth.
 
-- Source: <https://www.nutrient.io/ai/skills/pdf-to-markdown/>
-- Snapshot date: `2026-04-01`
-- Hardware note on page: `Benchmark data recorded on AMD EPYC 9454`
+- Source: [PSPDFKit-labs/opendataloader-bench](https://github.com/PSPDFKit-labs/opendataloader-bench/tree/benchmark-update-with-new-parsers)
+- Benchmark date: `2026-04-02`
+- Corpus: 200 documents from DP-Bench with ground-truth Markdown annotations
+- Metrics: NID (reading order), TEDS (table structure), MHS (heading hierarchy)
 
 ## Accuracy Metrics
 
 | Solution | Extraction accuracy | Reading order (NID) | Table structure (TEDS) | Heading level (MHS) |
 | --- | ---: | ---: | ---: | ---: |
-| Nutrient | 0.88 | 0.92 | 0.66 | 0.81 |
-| docling | 0.89 | 0.91 | 0.93 | 0.83 |
-| opendataloader | 0.84 | 0.91 | 0.49 | 0.74 |
-| opendataloader-hybrid | 0.83 | 0.91 | 0.43 | 0.73 |
-| pymupdf4llm | 0.74 | 0.89 | 0.40 | 0.43 |
-| markitdown | 0.58 | 0.88 | 0.00 | 0.00 |
+| docling | 0.88 | 0.90 | **0.89** | **0.82** |
+| **Nutrient** | **0.88** | **0.92** | 0.66 | 0.81 |
+| opendataloader | 0.83 | 0.90 | 0.49 | 0.74 |
+| pymupdf4llm | 0.83 | 0.88 | 0.48 | 0.78 |
+| markitdown | 0.59 | 0.84 | 0.27 | 0.00 |
+| pypdf | 0.58 | 0.87 | 0.00 | 0.00 |
+| liteparse | 0.57 | 0.86 | 0.00 | 0.00 |
 
 ## Speed
 
 | Solution | Seconds per page |
 | --- | ---: |
-| Nutrient | 0.008 |
-| opendataloader | 0.056 |
-| markitdown | 0.058 |
-| pymupdf4llm | 0.083 |
-| opendataloader-hybrid | 1.412 |
-| docling | 1.473 |
+| **Nutrient** | **0.007** |
+| opendataloader | 0.014 |
+| pypdf | 0.019 |
+| markitdown | 0.106 |
+| liteparse | 0.233 |
+| pymupdf4llm | 0.252 |
+| docling | 0.618 |
 
 ## Relative Speed Callouts
 
-- Nutrient is `176x` faster than `docling`
-- Nutrient is `172x` faster than `opendataloader-hybrid`
-- Nutrient is `10x` faster than `opendataloader`
-- Nutrient is `7x` faster than `pymupdf4llm`
-- Nutrient is `7x` faster than `markitdown`
+- Nutrient is `90x` faster than `docling`
+- Nutrient is `37x` faster than `pymupdf4llm`
+- Nutrient is `34x` faster than `liteparse`
+- Nutrient is `15x` faster than `markitdown`
+- Nutrient is `3x` faster than `pypdf`
+- Nutrient is `2x` faster than `opendataloader`
 
-## Note
+## Reproducibility
 
-This file reflects the currently published benchmark table. A public reproducibility harness is planned as a future addition.
+The benchmark harness, corpus, ground truth, and all engine outputs are published at:
+
+https://github.com/PSPDFKit-labs/opendataloader-bench/tree/benchmark-update-with-new-parsers
+
+To reproduce:
+
+```sh
+git clone -b benchmark-update-with-new-parsers https://github.com/PSPDFKit-labs/opendataloader-bench.git
+cd opendataloader-bench
+git lfs pull
+uv sync
+uv run src/run.py
+```

@@ -13,7 +13,7 @@
 
 Fast, accurate Markdown from PDFs — locally, with no cleanup required. Built for Claude, Codex, RAG pipelines, and document-heavy automation where noisy extraction burns tokens and makes downstream results less reliable.
 
-- **How fast is it?** — 0.008s per page. 176x faster than docling, 10x faster than opendataloader. ([benchmarks](#benchmarks))
+- **How fast is it?** — 0.007s per page. 90x faster than docling, 37x faster than pymupdf4llm. ([benchmarks](#benchmarks))
 - **How accurate is it?** — 0.92 reading order (best in class), 0.88 overall extraction accuracy, 0.81 heading detection. ([benchmarks](#benchmarks))
 - **Where do my PDFs go?** — Nowhere. The CLI runs locally. Your documents are not uploaded to Nutrient. ([trust & licensing](#trust-and-licensing))
 - **What does it cost?** — Free for up to 1,000 documents per calendar month. No license key, no signup, no API token. ([license](LICENSE.md))
@@ -86,47 +86,42 @@ When both arguments are directories, the CLI converts every PDF in the input dir
 
 ## Benchmarks
 
-Published benchmark values from [Nutrient's PDF-to-Markdown page](https://www.nutrient.io/ai/skills/pdf-to-markdown/), recorded on `AMD EPYC 9454`.
-
-### Visual Snapshot
-
-![Extraction accuracy benchmark](docs/assets/extraction-accuracy.svg)
-
-![Extraction speed benchmark](docs/assets/extraction-speed.svg)
-
-![Structure quality benchmark](docs/assets/structure-quality.svg)
-
-![Relative speedup benchmark](docs/assets/faster-with-nutrient.svg)
+Benchmark results from 200 PDF documents with hand-annotated ground truth, evaluated using the [opendataloader-bench](https://github.com/PSPDFKit-labs/opendataloader-bench/tree/benchmark-update-with-new-parsers) harness. Benchmarked on `2026-04-02`.
 
 ### Accuracy
 
-| Metric | Nutrient | Best competitor | MarkItDown |
-| --- | ---: | ---: | ---: |
-| Extraction accuracy | 0.88 | 0.89 (docling) | 0.58 |
-| Reading order (NID) | 0.92 | 0.91 | 0.88 |
-| Table structure (TEDS) | 0.66 | 0.93 (docling) | 0.00 |
-| Heading level (MHS) | 0.81 | 0.83 (docling) | 0.00 |
+| Solution | Overall | Reading Order (NID) | Table Structure (TEDS) | Heading Level (MHS) |
+| --- | ---: | ---: | ---: | ---: |
+| docling | **0.88** | 0.90 | **0.89** | **0.82** |
+| **Nutrient** | **0.88** | **0.92** | 0.66 | 0.81 |
+| opendataloader | 0.83 | 0.90 | 0.49 | 0.74 |
+| pymupdf4llm | 0.83 | 0.88 | 0.48 | 0.78 |
+| markitdown | 0.59 | 0.84 | 0.27 | 0.00 |
+| pypdf | 0.58 | 0.87 | 0.00 | 0.00 |
+| liteparse | 0.57 | 0.86 | 0.00 | 0.00 |
 
 ### Speed
 
 | Solution | Seconds per page |
 | --- | ---: |
-| Nutrient | 0.008 |
-| opendataloader | 0.056 |
-| markitdown | 0.058 |
-| pymupdf4llm | 0.083 |
-| opendataloader-hybrid | 1.412 |
-| docling | 1.473 |
+| **Nutrient** | **0.007** |
+| opendataloader | 0.014 |
+| pypdf | 0.019 |
+| markitdown | 0.106 |
+| liteparse | 0.233 |
+| pymupdf4llm | 0.252 |
+| docling | 0.618 |
 
 ### Faster with Nutrient
 
-- `176x` faster than `docling`
-- `172x` faster than `opendataloader-hybrid`
-- `10x` faster than `opendataloader`
-- `7x` faster than `pymupdf4llm`
-- `7x` faster than `markitdown`
+- `90x` faster than `docling`
+- `37x` faster than `pymupdf4llm`
+- `34x` faster than `liteparse`
+- `15x` faster than `markitdown`
+- `3x` faster than `pypdf`
+- `2x` faster than `opendataloader`
 
-For the full comparison table, see [docs/benchmarks.md](docs/benchmarks.md).
+For the full comparison table and reproducibility instructions, see [docs/benchmarks.md](docs/benchmarks.md).
 
 ## Trust and Licensing
 
@@ -142,7 +137,7 @@ See [LICENSE.md](LICENSE.md) for the full terms and [docs/distribution-model.md]
 
 ### What makes this different from other PDF extractors?
 
-Speed and accuracy should not be a tradeoff. Most extractors are either fast but lose structure (markitdown, pymupdf4llm) or accurate but slow (docling). Nutrient extracts at 0.008s per page with strong reading order, heading, and table preservation — less cleanup, fewer wasted tokens, and more reliable downstream results.
+Speed and accuracy should not be a tradeoff. Most extractors are either fast but lose structure (markitdown, pymupdf4llm) or accurate but slow (docling). Nutrient extracts at 0.007s per page with strong reading order, heading, and table preservation — less cleanup, fewer wasted tokens, and more reliable downstream results.
 
 ### Do my documents leave my machine?
 
