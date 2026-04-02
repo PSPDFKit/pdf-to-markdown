@@ -55,7 +55,17 @@ cd pdf-to-markdown
 
 ## Usage
 
-### Single PDF
+### Via agent skill
+
+Once the [Nutrient Skills](https://github.com/pspdfkit-labs/nutrient-skills) plugin is installed, your agent handles PDF extraction automatically. Reference a PDF in your prompt and the skill invokes the CLI transparently:
+
+> "Extract the pricing table from proposal.pdf"
+
+No extra commands needed — the skill manages extraction and passes the resulting Markdown to your agent context.
+
+### Via CLI
+
+#### Single PDF
 
 ```bash
 pdf-to-markdown input.pdf output.md
@@ -63,7 +73,7 @@ pdf-to-markdown input.pdf output.md
 
 If `output.md` is omitted, Markdown is written to stdout.
 
-### Batch directory
+#### Batch directory
 
 ```bash
 pdf-to-markdown ./input-pdfs ./output-markdown
@@ -128,6 +138,7 @@ For the full comparison table, see [docs/benchmarks.md](docs/benchmarks.md).
 - PDFs stay local — your documents are not uploaded to Nutrient by this extractor
 - A commercial license is required for processing more than `1,000` documents per month
 - The extraction engine is delivered as a signed platform binary; the repo contains only the wrapper and documentation
+- The license is non-transferable — you may not redistribute the binary standalone or sublicense it to third parties; embedding it in your own application is permitted under the free tier terms
 
 See [LICENSE.md](LICENSE.md) for the full terms and [docs/distribution-model.md](docs/distribution-model.md) for details on what ships in this repo vs. the binary.
 
