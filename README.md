@@ -35,6 +35,12 @@ Or with marketplace/plugin flows:
 /plugin install pdf-to-markdown@nutrient-skills
 ```
 
+Once installed, just reference a PDF in your prompt — no extra commands needed:
+
+> "Extract the pricing table from proposal.pdf"
+
+The skill invokes the CLI transparently and passes the resulting Markdown into your agent context.
+
 ### Standalone CLI
 
 For use outside an agent, install the CLI directly:
@@ -128,6 +134,7 @@ For the full comparison table, see [docs/benchmarks.md](docs/benchmarks.md).
 - PDFs stay local — your documents are not uploaded to Nutrient by this extractor
 - A commercial license is required for processing more than `1,000` documents per month
 - The extraction engine is delivered as a signed platform binary; the repo contains only the wrapper and documentation
+- The license is non-transferable — you may not redistribute the binary standalone or sublicense it to third parties; embedding it in your own application is permitted under the free tier terms
 
 See [LICENSE.md](LICENSE.md) for the full terms and [docs/distribution-model.md](docs/distribution-model.md) for details on what ships in this repo vs. the binary.
 
