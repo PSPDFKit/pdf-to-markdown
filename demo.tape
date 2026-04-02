@@ -5,40 +5,27 @@
 Output docs/assets/demo.gif
 
 Set Shell "bash"
-Set FontSize 16
-Set Width 900
-Set Height 500
+Set FontSize 15
+Set Width 920
+Set Height 540
 Set Theme "Catppuccin Mocha"
 Set Padding 20
-Set TypingSpeed 40ms
+Set TypingSpeed 50ms
 
-# Title moment
-Type "# Convert a PDF to clean Markdown"
+# Convert a single PDF to Markdown
+Type "pdf-to-markdown sample-report.pdf"
 Enter
-Sleep 1s
+Sleep 4s
 
-# Single file conversion
-Type "pdf-to-markdown report.pdf"
-Enter
-Sleep 2.5s
-
-# Show a glimpse of the output
-Type "head -30 report.md"
+# Save output to a file
+Type "pdf-to-markdown sample-report.pdf report.md"
 Enter
 Sleep 3s
 
-# Batch conversion
-Type "# Batch convert an entire directory"
+# Confirm the file was written
+Type "head -20 report.md"
 Enter
-Sleep 500ms
-Type "pdf-to-markdown ./contracts ./output"
-Enter
-Sleep 2s
-
-# Show results
-Type "ls output/"
-Enter
-Sleep 2s
+Sleep 3s
 
 # Done
 Sleep 1s
