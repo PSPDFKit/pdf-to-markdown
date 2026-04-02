@@ -16,7 +16,7 @@ Fast, accurate Markdown from PDFs — locally, with no cleanup required. Built f
 - **How fast is it?** — 0.008s per page. 176x faster than docling, 10x faster than opendataloader. ([benchmarks](#benchmarks))
 - **How accurate is it?** — 0.92 reading order (best in class), 0.88 overall extraction accuracy, 0.81 heading detection. ([benchmarks](#benchmarks))
 - **Where do my PDFs go?** — Nowhere. The CLI runs locally. Your documents are not uploaded to Nutrient. ([trust & licensing](#trust-and-licensing))
-- **What does it cost?** — Free for up to 1,000 documents per calendar month. ([license](LICENSE.md))
+- **What does it cost?** — Free for up to 1,000 documents per calendar month. No license key, no signup, no API token. ([license](LICENSE.md))
 
 ## Install
 
@@ -141,9 +141,9 @@ Speed and accuracy should not be a tradeoff. Most extractors are either fast but
 
 No. The CLI processes PDFs locally. Nothing is uploaded to Nutrient. Note that if you feed the extracted Markdown into Claude, Codex, or another model provider, their own data policies apply.
 
-### How does licensing work?
+### Do I need a license key or API token?
 
-Free for up to 1,000 documents per calendar month. A commercial license is required above that threshold. See [LICENSE.md](LICENSE.md) for the full terms, or contact `sales@nutrient.io`.
+No. There is no signup, no license key, and no API token. Install the CLI and start converting. The free tier (up to 1,000 documents per calendar month) is enforced via the [license terms](LICENSE.md), not a technical gate. If you need to process more than 1,000 documents per month, contact `sales@nutrient.io` for a commercial license.
 
 ### Why is the extraction engine closed-source?
 
