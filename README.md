@@ -1,5 +1,14 @@
 # Nutrient PDF to Markdown
 
+[![License: Proprietary](https://img.shields.io/badge/license-Nutrient_Free_Use-blue)](LICENSE.md)
+[![macOS](https://img.shields.io/badge/macOS-arm64-brightgreen)](https://github.com/PSPDFKit/pdf-to-markdown)
+[![Linux](https://img.shields.io/badge/Linux-x64_|_arm64-brightgreen)](https://github.com/PSPDFKit/pdf-to-markdown)
+[![Windows](https://img.shields.io/badge/Windows-x64_(coming_soon)-yellow)](https://github.com/PSPDFKit/pdf-to-markdown)
+
+<p align="center">
+  <img src="docs/assets/demo.gif" alt="pdf-to-markdown demo" width="720">
+</p>
+
 **Stop wasting your context window on PDF extraction.**
 
 Fast, accurate Markdown from PDFs — locally, with no cleanup required. Built for Claude, Codex, RAG pipelines, and document-heavy automation where noisy extraction burns tokens and makes downstream results less reliable.
@@ -67,6 +76,7 @@ When both arguments are directories, the CLI converts every PDF in the input dir
 - macOS Apple Silicon (`Darwin/arm64`)
 - Linux x86_64
 - Linux arm64
+- Windows x64 (coming soon)
 
 ## Benchmarks
 
@@ -119,7 +129,7 @@ For the full comparison table, see [docs/benchmarks.md](docs/benchmarks.md).
 - A commercial license is required for processing more than `1,000` documents per month
 - The extraction engine is delivered as a signed platform binary; the repo contains only the wrapper and documentation
 
-See [LICENSE.md](LICENSE.md) for the full terms.
+See [LICENSE.md](LICENSE.md) for the full terms and [docs/distribution-model.md](docs/distribution-model.md) for details on what ships in this repo vs. the binary.
 
 ## FAQ
 
