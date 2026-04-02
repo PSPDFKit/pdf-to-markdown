@@ -88,6 +88,20 @@ When both arguments are directories, the CLI converts every PDF in the input dir
 
 Benchmark results from 200 PDF documents with hand-annotated Markdown ground truth, evaluated using NID (reading order), TEDS (table structure), and MHS (heading hierarchy) metrics. Benchmarked on `2026-04-02`.
 
+### Visual Snapshot
+
+![Extraction accuracy](docs/assets/extraction-accuracy.png)
+
+![Reading order](docs/assets/reading-order.png)
+
+![Table structure](docs/assets/table-structure.png)
+
+![Heading level](docs/assets/heading-level.png)
+
+![Extraction speed](docs/assets/extraction-speed.png)
+
+![Faster with Nutrient](docs/assets/faster-with-nutrient.png)
+
 ### Accuracy
 
 | Solution | Overall | Reading Order (NID) | Table Structure (TEDS) | Heading Level (MHS) |
