@@ -3,7 +3,7 @@
 These values mirror the benchmark figures currently published on Nutrient's PDF-to-Markdown product page:
 
 - Source: <https://www.nutrient.io/ai/skills/pdf-to-markdown/>
-- Snapshot date: `2026-03-31`
+- Snapshot date: `2026-04-01`
 - Hardware note on page: `Benchmark data recorded on AMD EPYC 9454`
 
 ## Accuracy Metrics
@@ -23,16 +23,16 @@ These values mirror the benchmark figures currently published on Nutrient's PDF-
 | --- | ---: |
 | Nutrient | 0.008 |
 | opendataloader | 0.056 |
-| opendataloader-hybrid | 0.057 |
 | markitdown | 0.058 |
 | pymupdf4llm | 0.083 |
+| opendataloader-hybrid | 1.412 |
 | docling | 1.473 |
 
 ## Relative Speed Callouts
 
 - Nutrient is `176x` faster than `docling`
+- Nutrient is `172x` faster than `opendataloader-hybrid`
 - Nutrient is `10x` faster than `opendataloader`
-- Nutrient is `7x` faster than `opendataloader-hybrid`
 - Nutrient is `7x` faster than `pymupdf4llm`
 - Nutrient is `7x` faster than `markitdown`
 

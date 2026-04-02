@@ -97,16 +97,16 @@ Published benchmark values from [Nutrient's PDF-to-Markdown page](https://www.nu
 | --- | ---: |
 | Nutrient | 0.008 |
 | opendataloader | 0.056 |
-| opendataloader-hybrid | 0.057 |
 | markitdown | 0.058 |
 | pymupdf4llm | 0.083 |
+| opendataloader-hybrid | 1.412 |
 | docling | 1.473 |
 
 ### Faster with Nutrient
 
 - `176x` faster than `docling`
+- `172x` faster than `opendataloader-hybrid`
 - `10x` faster than `opendataloader`
-- `7x` faster than `opendataloader-hybrid`
 - `7x` faster than `pymupdf4llm`
 - `7x` faster than `markitdown`
 
