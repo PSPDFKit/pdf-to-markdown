@@ -1,0 +1,5 @@
+node_modules/
+*.tgz
+.DS_Store
+sample-report.pdf
+report.md

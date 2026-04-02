@@ -1,0 +1,29 @@
+<svg width="960" height="430" viewBox="0 0 960 430" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="430" rx="24" fill="#F2F8F7"/>
+  <text x="44" y="56" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Extraction Time Per Page</text>
+  <text x="44" y="84" fill="#6B625A" font-family="Arial, Helvetica, sans-serif" font-size="16">Seconds per solution. Lower is better.</text>
+
+  <text x="44" y="130" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Nutrient</text>
+  <rect x="220" y="112" width="6" height="28" rx="14" fill="#0E8F82"/>
+  <text x="824" y="132" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">0.008s</text>
+
+  <text x="44" y="182" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">opendataloader</text>
+  <rect x="220" y="164" width="41" height="28" rx="14" fill="#BEB6AC"/>
+  <text x="824" y="184" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">0.056s</text>
+
+  <text x="44" y="234" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">opendataloader-hybrid</text>
+  <rect x="220" y="216" width="42" height="28" rx="14" fill="#D4CDC4"/>
+  <text x="824" y="236" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">0.057s</text>
+
+  <text x="44" y="286" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">markitdown</text>
+  <rect x="220" y="268" width="42" height="28" rx="14" fill="#D4CDC4"/>
+  <text x="824" y="288" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">0.058s</text>
+
+  <text x="44" y="338" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">pymupdf4llm</text>
+  <rect x="220" y="320" width="61" height="28" rx="14" fill="#D4CDC4"/>
+  <text x="824" y="340" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">0.083s</text>
+
+  <text x="44" y="390" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">docling</text>
+  <rect x="220" y="372" width="580" height="28" rx="14" fill="#2A2F39"/>
+  <text x="824" y="392" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">1.473s</text>
+</svg>

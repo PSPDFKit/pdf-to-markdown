@@ -1,0 +1,21 @@
+<svg width="960" height="360" viewBox="0 0 960 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="360" rx="24" fill="#F5F2EB"/>
+  <text x="44" y="56" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Faster With Nutrient</text>
+  <text x="44" y="84" fill="#6B625A" font-family="Arial, Helvetica, sans-serif" font-size="16">Relative speedups from the live benchmark snapshot</text>
+
+  <text x="44" y="132" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">docling</text>
+  <rect x="220" y="114" width="580" height="28" rx="14" fill="#2A2F39"/>
+  <text x="822" y="134" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">176x</text>
+
+  <text x="44" y="184" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">opendataloader</text>
+  <rect x="220" y="166" width="166" height="28" rx="14" fill="#BEB6AC"/>
+  <text x="822" y="186" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">10x</text>
+
+  <text x="44" y="236" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">opendataloader-hybrid</text>
+  <rect x="220" y="218" width="116" height="28" rx="14" fill="#D4CDC4"/>
+  <text x="822" y="238" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">7x</text>
+
+  <text x="44" y="288" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">markitdown</text>
+  <rect x="220" y="270" width="116" height="28" rx="14" fill="#D4CDC4"/>
+  <text x="822" y="290" fill="#1F1A17" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">7x</text>
+</svg>

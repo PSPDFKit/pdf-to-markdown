@@ -1,0 +1,219 @@
+#!/bin/sh
+set -eu
+
+STATE_DIR="${HOME}/.local/share/nutrient"
+INSTALL_DIR="${STATE_DIR}/cli"
+STATE_FILE="${STATE_DIR}/pdf-to-markdown-state"
+CHECK_INTERVAL_SECONDS=21600
+LATEST_URL="https://agent-cdn.nutrient.io/pdf-to-markdown/LATEST"
+CDN_PREFIX="https://agent-cdn.nutrient.io/pdf-to-markdown"
+
+case "$(uname -s)/$(uname -m)" in
+  Linux/aarch64)
+    TARGET_ID="linux-arm64"
+    BINARY_NAME="nutrient-linux-arm64"
+    ;;
+  Linux/x86_64)
+    TARGET_ID="linux-amd64"
+    BINARY_NAME="nutrient-linux-amd64"
+    ;;
+  Darwin/arm64)
+    TARGET_ID="macos-arm64"
+    BINARY_NAME="nutrient-macos-arm64"
+    ;;
+  *)
+    echo "Unsupported platform: $(uname -s)/$(uname -m)" >&2
+    exit 1
+    ;;
+esac
+
+NUTRIENT_CLI="${INSTALL_DIR}/${BINARY_NAME}"
+LAST_CHECKED_AT=""
+RELEASE_ID=""
+INSTALL_READY=0
+
+load_state() {
+  if [ -f "$STATE_FILE" ]; then
+    LAST_CHECKED_AT="$(sed -n 's/^LAST_CHECKED_AT=//p' "$STATE_FILE" | tail -n 1)"
+    RELEASE_ID="$(sed -n 's/^RELEASE_ID=//p' "$STATE_FILE" | tail -n 1)"
+  fi
+}
+
+write_state() {
+  mkdir -p "$STATE_DIR"
+  {
+    printf 'LAST_CHECKED_AT=%s\n' "$1"
+    printf 'RELEASE_ID=%s\n' "$2"
+  } > "$STATE_FILE"
+}
+
+have_installed_binary() {
+  [ -x "$NUTRIENT_CLI" ]
+}
+
+download_to_stdout() {
+  url="$1"
+
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$url"
+    return 0
+  fi
+
+  if command -v wget >/dev/null 2>&1; then
+    wget -q -O - "$url"
+    return 0
+  fi
+
+  echo "Neither curl nor wget is available for downloading files" >&2
+  return 1
+}
+
+download_to_file() {
+  url="$1"
+  destination="$2"
+
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$url" -o "$destination"
+    return 0
+  fi
+
+  if command -v wget >/dev/null 2>&1; then
+    wget -q -O "$destination" "$url"
+    return 0
+  fi
+
+  echo "Neither curl nor wget is available for downloading files" >&2
+  return 1
+}
+
+fetch_latest_release_id() {
+  latest="$(download_to_stdout "$LATEST_URL")" || return 1
+  latest="$(printf '%s' "$latest" | tr -d '\r' | sed -e 's/[[:space:]]*$//')"
+
+  case "$latest" in
+    *[!A-Za-z0-9T._-]*|'') return 1 ;;
+    *) printf '%s' "$latest" ;;
+  esac
+}
+
+archive_url_for_release() {
+  release_id="$1"
+
+  case "$release_id" in
+    *[!A-Za-z0-9T._-]*|'') return 1 ;;
+    *) printf '%s/%s/%s.tar.gz' "$CDN_PREFIX" "$release_id" "$TARGET_ID" ;;
+  esac
+}
+
+selected_binary_exists() {
+  selected_binary="$1"
+  [ -x "$selected_binary" ]
+}
+
+validate_extract_contents() {
+  extract_dir="$1"
+  selected_binary="$2"
+
+  [ -x "$selected_binary" ] || return 1
+
+  found_count="$(find "$extract_dir" -maxdepth 1 -type f | wc -l | tr -d ' ')"
+  case "$found_count" in
+    1) ;;
+    *) return 1 ;;
+  esac
+}
+
+install_archive() {
+  archive_url="$1"
+  archive_tmp="$(mktemp "${TMPDIR:-/tmp}/pdf-to-markdown.XXXXXX")"
+  extract_tmp="$(mktemp -d "${TMPDIR:-/tmp}/pdf-to-markdown.XXXXXX")"
+  next_install_dir="${INSTALL_DIR}.new.$$"
+
+  cleanup() {
+    rm -f "$archive_tmp"
+    rm -rf "$extract_tmp"
+    rm -rf "$next_install_dir"
+  }
+
+  trap cleanup EXIT INT TERM HUP
+
+  download_to_file "$archive_url" "$archive_tmp"
+  tar -xzf "$archive_tmp" -C "$extract_tmp"
+
+  mkdir -p "$STATE_DIR"
+  rm -rf "$next_install_dir"
+  mkdir -p "$next_install_dir"
+  tar -cf - -C "$extract_tmp" . | tar -xf - -C "$next_install_dir"
+
+  validate_extract_contents "$next_install_dir" "$next_install_dir/$(basename "$NUTRIENT_CLI")" || {
+    echo "Installed archive is missing the expected binary" >&2
+    return 1
+  }
+
+  rm -rf "$INSTALL_DIR"
+  mv "$next_install_dir" "$INSTALL_DIR"
+
+  trap - EXIT INT TERM HUP
+  cleanup
+}
+
+refresh_if_needed() {
+  now="$(date +%s)"
+  load_state
+
+  if have_installed_binary; then
+    INSTALL_READY=1
+  fi
+
+  should_check=1
+  if [ "$INSTALL_READY" -eq 1 ] && [ -n "$LAST_CHECKED_AT" ]; then
+    next_check_at=$((LAST_CHECKED_AT + CHECK_INTERVAL_SECONDS))
+    if [ "$now" -lt "$next_check_at" ]; then
+      should_check=0
+    fi
+  fi
+
+  if [ "$INSTALL_READY" -eq 1 ] && [ "$should_check" -eq 0 ]; then
+    return 0
+  fi
+
+  latest_release_id="$(fetch_latest_release_id)" || {
+    if [ "$INSTALL_READY" -eq 1 ]; then
+      return 0
+    fi
+    echo "Failed to fetch latest pdf-to-markdown release id" >&2
+    exit 1
+  }
+
+  if [ "$INSTALL_READY" -eq 1 ] && [ "$latest_release_id" = "$RELEASE_ID" ]; then
+    write_state "$now" "$latest_release_id"
+    return 0
+  fi
+
+  latest_archive_url="$(archive_url_for_release "$latest_release_id")" || {
+    if [ "$INSTALL_READY" -eq 1 ]; then
+      return 0
+    fi
+    echo "Failed to build archive URL for release $latest_release_id" >&2
+    exit 1
+  }
+
+  install_archive "$latest_archive_url" || {
+    if [ "$INSTALL_READY" -eq 1 ]; then
+      return 0
+    fi
+    echo "Failed to install pdf-to-markdown archive for $TARGET_ID" >&2
+    exit 1
+  }
+
+  write_state "$now" "$latest_release_id"
+}
+
+refresh_if_needed
+
+if ! selected_binary_exists "$NUTRIENT_CLI"; then
+  echo "Binary not found or install is incomplete: $NUTRIENT_CLI" >&2
+  exit 1
+fi
+
+exec "$NUTRIENT_CLI" "$@"
