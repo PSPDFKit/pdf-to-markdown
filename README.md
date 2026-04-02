@@ -86,7 +86,7 @@ When both arguments are directories, the CLI converts every PDF in the input dir
 
 ## Benchmarks
 
-Benchmark results from 200 PDF documents with hand-annotated ground truth, evaluated using the [opendataloader-bench](https://github.com/PSPDFKit-labs/opendataloader-bench/tree/benchmark-update-with-new-parsers) harness. Benchmarked on `2026-04-02`.
+Benchmark results from 200 PDF documents with hand-annotated Markdown ground truth, evaluated using NID (reading order), TEDS (table structure), and MHS (heading hierarchy) metrics. Benchmarked on `2026-04-02`.
 
 ### Accuracy
 
@@ -121,7 +121,7 @@ Benchmark results from 200 PDF documents with hand-annotated ground truth, evalu
 - `3x` faster than `pypdf`
 - `2x` faster than `opendataloader`
 
-For the full comparison table and reproducibility instructions, see [docs/benchmarks.md](docs/benchmarks.md).
+For the full comparison table, see [docs/benchmarks.md](docs/benchmarks.md).
 
 ## Trust and Licensing
 

@@ -1,11 +1,11 @@
 # Benchmarks
 
-These values are from a reproducible benchmark run using the [opendataloader-bench](https://github.com/PSPDFKit-labs/opendataloader-bench) evaluation harness on 200 PDF documents with hand-annotated ground truth.
+Evaluated on 200 PDF documents with hand-annotated Markdown ground truth from the DP-Bench corpus.
 
-- Source: [PSPDFKit-labs/opendataloader-bench](https://github.com/PSPDFKit-labs/opendataloader-bench/tree/benchmark-update-with-new-parsers)
 - Benchmark date: `2026-04-02`
-- Corpus: 200 documents from DP-Bench with ground-truth Markdown annotations
+- Corpus: 200 documents with ground-truth Markdown annotations
 - Metrics: NID (reading order), TEDS (table structure), MHS (heading hierarchy)
+- All scores normalized to [0, 1] — higher is better
 
 ## Accuracy Metrics
 
@@ -39,19 +39,3 @@ These values are from a reproducible benchmark run using the [opendataloader-ben
 - Nutrient is `15x` faster than `markitdown`
 - Nutrient is `3x` faster than `pypdf`
 - Nutrient is `2x` faster than `opendataloader`
-
-## Reproducibility
-
-The benchmark harness, corpus, ground truth, and all engine outputs are published at:
-
-https://github.com/PSPDFKit-labs/opendataloader-bench/tree/benchmark-update-with-new-parsers
-
-To reproduce:
-
-```sh
-git clone -b benchmark-update-with-new-parsers https://github.com/PSPDFKit-labs/opendataloader-bench.git
-cd opendataloader-bench
-git lfs pull
-uv sync
-uv run src/run.py
-```
