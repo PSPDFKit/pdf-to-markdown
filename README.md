@@ -16,6 +16,7 @@ Fast, accurate Markdown from PDFs — locally, with no cleanup required. Built f
 
 - **How fast is it?** — 0.007s per page. 87x faster than docling, 10x faster than pymupdf4llm. ([benchmarks](#benchmarks))
 - **How accurate is it?** — 0.93 reading order (best in class), 0.89 overall extraction accuracy, 0.82 heading detection. ([benchmarks](#benchmarks))
+- **NEW: Image export** — `--enable-image-export` extracts images alongside Markdown for vision-capable LLMs. ([usage](#image-export))
 - **Where do my PDFs go?** — Nowhere. The CLI runs locally. Your documents are not uploaded to Nutrient. ([trust & licensing](#trust-and-licensing))
 - **What does it cost?** — Free for up to 1,000 documents per calendar month. No license key, no signup, no API token. ([license](LICENSE.md))
 
