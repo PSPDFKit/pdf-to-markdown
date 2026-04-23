@@ -13,7 +13,7 @@ Evaluated on 200 PDF documents with hand-annotated Markdown ground truth from th
 
 | Solution | Version | Extraction accuracy | Reading order (NID) | Table structure (TEDS) | Heading level (MHS) |
 | --- | --- | ---: | ---: | ---: | ---: |
-| **Nutrient** | 2.0.2 | **0.89** | **0.93** | 0.71 | 0.82 |
+| **Nutrient** | 1.0.1 | **0.89** | **0.93** | 0.71 | 0.82 |
 | docling | 2.91.0 | 0.88 | 0.90 | **0.89** | **0.82** |
 | opendataloader-hybrid | 2.3.0 | 0.87 | 0.91 | 0.68 | 0.81 |
 | pymupdf4llm | 1.27.2 | 0.83 | 0.89 | 0.54 | 0.77 |
