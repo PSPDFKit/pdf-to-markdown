@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.2 — 2026-04-23
+
+- Re-run benchmarks with all competitor libraries updated to latest versions
+- Pin exact library versions in benchmark tables for transparency
+- Fix ODL hybrid scoring (was running without docling backend server, producing degraded results)
+- pymupdf4llm updated 0.3.4 → 1.27.2 (major version bump, significant quality improvement)
+- markitdown updated 0.1.4 → 0.1.5 (table extraction restored)
+- opendataloader-pdf updated 1.9.1 → 2.3.0
+- docling updated 2.71.0 → 2.91.0
+
 ## 0.2.1 — 2026-04-22
 
 - Add `--enable-image-export` flag: extracts images to `{output}_resources/` and references them as Markdown image links (off by default)

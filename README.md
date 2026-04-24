@@ -14,7 +14,7 @@
 
 Fast, accurate Markdown from PDFs — locally, with no cleanup required. Built for Claude, Codex, RAG pipelines, and document-heavy automation where noisy extraction burns tokens and makes downstream results less reliable.
 
-- **How fast is it?** — 0.007s per page. 87x faster than docling, 10x faster than pymupdf4llm. ([benchmarks](#benchmarks))
+- **How fast is it?** — 0.011s per page. 48x faster than docling, 29x faster than pymupdf4llm. ([benchmarks](#benchmarks))
 - **How accurate is it?** — 0.93 reading order (best in class), 0.89 overall extraction accuracy, 0.82 heading detection. ([benchmarks](#benchmarks))
 - **NEW: Image export** — `--enable-image-export` extracts images alongside Markdown for vision-capable LLMs. ([usage](#image-export))
 - **Where do my PDFs go?** — Nowhere. The CLI runs locally. Your documents are not uploaded to Nutrient. ([trust & licensing](#trust-and-licensing))
@@ -124,56 +124,56 @@ Extracts images from the PDF and saves them to `output_resources/`, referenced a
 
 ## Benchmarks
 
-Benchmark results from 200 PDF documents with hand-annotated Markdown ground truth, evaluated using NID (reading order), TEDS (table structure), and MHS (heading hierarchy) metrics. Benchmarked on `2026-04-22`.
+Benchmark results from 200 PDF documents with hand-annotated Markdown ground truth, evaluated using NID (reading order), TEDS (table structure), and MHS (heading hierarchy) metrics. All competitor libraries pinned to their latest versions as of `2026-04-23`.
 
 ### Visual Snapshot
 
-![Extraction accuracy](https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/docs/assets/extraction-accuracy.png?v=20260422)
+![Extraction accuracy](https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/docs/assets/extraction-accuracy.png?v=20260423)
 
-![Reading order](https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/docs/assets/reading-order.png?v=20260422)
+![Reading order](https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/docs/assets/reading-order.png?v=20260423)
 
-![Table structure](https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/docs/assets/table-structure.png?v=20260422)
+![Table structure](https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/docs/assets/table-structure.png?v=20260423)
 
-![Heading level](https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/docs/assets/heading-level.png?v=20260422)
+![Heading level](https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/docs/assets/heading-level.png?v=20260423)
 
-![Extraction speed](https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/docs/assets/extraction-speed.png?v=20260422)
+![Extraction speed](https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/docs/assets/extraction-speed.png?v=20260423)
 
-![Faster with Nutrient](https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/docs/assets/faster-with-nutrient.png?v=20260422)
+![Faster with Nutrient](https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main/docs/assets/faster-with-nutrient.png?v=20260423)
 
 ### Accuracy
 
-| Solution | Overall | Reading Order (NID) | Table Structure (TEDS) | Heading Level (MHS) |
-| --- | ---: | ---: | ---: | ---: |
-| **Nutrient** | **0.89** | **0.93** | 0.71 | 0.82 |
-| docling | 0.88 | 0.90 | **0.89** | **0.82** |
-| opendataloader | 0.84 | 0.91 | 0.49 | 0.74 |
-| opendataloader-hybrid | 0.83 | 0.92 | 0.43 | 0.73 |
-| pymupdf4llm | 0.74 | 0.89 | 0.40 | 0.43 |
-| markitdown | 0.58 | 0.88 | 0.00 | 0.00 |
-| pypdf | 0.58 | 0.87 | 0.00 | 0.00 |
-| liteparse | 0.57 | 0.86 | 0.00 | 0.00 |
+| Solution | Version | Overall | Reading Order (NID) | Table Structure (TEDS) | Heading Level (MHS) |
+| --- | --- | ---: | ---: | ---: | ---: |
+| **Nutrient** | 1.0.1 | **0.89** | **0.93** | 0.71 | 0.82 |
+| docling | 2.91.0 | 0.88 | 0.90 | **0.89** | **0.82** |
+| opendataloader-hybrid | 2.3.0 | 0.87 | 0.91 | 0.68 | 0.81 |
+| pymupdf4llm | 1.27.2 | 0.83 | 0.89 | 0.54 | 0.77 |
+| opendataloader | 2.3.0 | 0.83 | 0.90 | 0.48 | 0.74 |
+| markitdown | 0.1.5 | 0.59 | 0.84 | 0.27 | 0.00 |
+| pypdf | 6.10.2 | 0.58 | 0.87 | 0.00 | 0.00 |
+| liteparse | 1.2.1 | 0.57 | 0.86 | 0.00 | 0.00 |
 
 ### Speed
 
 | Solution | Seconds per page |
 | --- | ---: |
-| **Nutrient** | **0.007** |
-| pypdf | 0.017 |
-| markitdown | 0.038 |
-| opendataloader-hybrid | 0.048 |
-| pymupdf4llm | 0.071 |
-| opendataloader | 0.079 |
-| docling | 0.610 |
-| liteparse | 1.033 |
+| **Nutrient** | **0.011** |
+| pypdf | 0.019 |
+| opendataloader | 0.023 |
+| markitdown | 0.097 |
+| pymupdf4llm | 0.319 |
+| opendataloader-hybrid | 0.444 |
+| docling | 0.527 |
+| liteparse | 1.081 |
 
 ### Faster with Nutrient
 
-- `147x` faster than `liteparse`
-- `87x` faster than `docling`
-- `11x` faster than `opendataloader`
-- `10x` faster than `pymupdf4llm`
-- `7x` faster than `opendataloader-hybrid`
-- `5x` faster than `markitdown`
+- `98x` faster than `liteparse`
+- `48x` faster than `docling`
+- `40x` faster than `opendataloader-hybrid`
+- `29x` faster than `pymupdf4llm`
+- `9x` faster than `markitdown`
+- `2x` faster than `opendataloader`
 
 For the full comparison table, see [docs/benchmarks.md](docs/benchmarks.md).
 
@@ -191,7 +191,7 @@ See [LICENSE.md](LICENSE.md) for the full terms and [docs/distribution-model.md]
 
 ### What makes this different from other PDF extractors?
 
-Speed and accuracy should not be a tradeoff. Most extractors are either fast but lose structure (markitdown, pymupdf4llm) or accurate but slow (docling). Nutrient extracts at 0.007s per page with the best reading order score (0.93), strong heading and table preservation — less cleanup, fewer wasted tokens, and more reliable downstream results.
+Speed and accuracy should not be a tradeoff. Most extractors are either fast but lose structure (markitdown, pymupdf4llm) or accurate but slow (docling). Nutrient extracts at 0.011s per page with the best reading order score (0.93), strong heading and table preservation — less cleanup, fewer wasted tokens, and more reliable downstream results.
 
 ### Do my documents leave my machine?
 
