@@ -39,10 +39,12 @@ All three install together from this package (and from the [Nutrient Skills](htt
 
 ### Agent skill (recommended)
 
-If you use Claude Code, Codex, Pi, Cursor, or Gemini CLI, install the [Nutrient Skills](https://github.com/pspdfkit-labs/nutrient-skills) plugin — the extraction runs automatically when your agent needs to read a PDF:
+If you use Claude Code, Codex, Pi, Cursor, or Gemini CLI, install the [Nutrient Skills](https://github.com/pspdfkit-labs/nutrient-skills) plugin — the extraction runs automatically when your agent needs to read a PDF. Add whichever of the three skills you want (they share one binary, so any of them installs it):
 
 ```bash
 npx skills add pspdfkit-labs/nutrient-skills --skill pdf-to-markdown
+npx skills add pspdfkit-labs/nutrient-skills --skill pdf-to-text
+npx skills add pspdfkit-labs/nutrient-skills --skill query
 ```
 
 Or with marketplace/plugin flows (Claude Code, Codex):
@@ -50,6 +52,8 @@ Or with marketplace/plugin flows (Claude Code, Codex):
 ```text
 /plugin marketplace add pspdfkit-labs/nutrient-skills
 /plugin install pdf-to-markdown@nutrient-skills
+/plugin install pdf-to-text@nutrient-skills
+/plugin install query@nutrient-skills
 ```
 
 With Pi:
@@ -57,8 +61,6 @@ With Pi:
 ```bash
 pi install git:github.com/PSPDFKit-labs/nutrient-skills
 ```
-
-The marketplace also ships the `pdf-to-text` and `query` skills — install them the same way (`--skill pdf-to-text`, `--skill query`) to give your agent the full convert → search workflow.
 
 Once installed, just reference a PDF in your prompt — no extra commands needed:
 
