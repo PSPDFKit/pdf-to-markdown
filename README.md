@@ -1,6 +1,6 @@
 # Nutrient PDF to Markdown
 
-[![License: Proprietary](https://img.shields.io/badge/license-Nutrient_Free_Use-blue)](LICENSE.md)
+[![License: Proprietary](https://img.shields.io/badge/license-Nutrient_PDF_to_Markdown-blue)](LICENSE.md)
 [![npm version](https://img.shields.io/npm/v/%40pspdfkit%2Fpdf-to-markdown)](https://www.npmjs.com/package/@pspdfkit/pdf-to-markdown)
 [![macOS](https://img.shields.io/badge/macOS-arm64-brightgreen)](https://github.com/PSPDFKit/pdf-to-markdown)
 [![Linux](https://img.shields.io/badge/Linux-x64_|_arm64-brightgreen)](https://github.com/PSPDFKit/pdf-to-markdown)
@@ -16,11 +16,11 @@ Fast, accurate Markdown from PDFs — locally, with no cleanup required. Built f
 
 - **How fast is it?** — 0.004s per page. 134x faster than docling, 53x faster than pymupdf4llm. ([benchmarks](#benchmarks))
 - **How accurate is it?** — 0.93 reading order (best in class), 0.89 overall extraction accuracy, 0.82 heading detection. ([benchmarks](#benchmarks))
-- **NEW: `--vision` tier** — a licensed machine-vision ICR pipeline that tops every accuracy metric, including tables (0.94 TEDS), handles scanned and handwritten documents — and still runs faster than docling (0.35s per page). ([benchmarks](#benchmarks))
+- **`--vision` tier** — a machine-vision ICR pipeline that tops every accuracy metric, including tables (0.94 TEDS), handles scanned and handwritten documents — and still runs faster than docling (0.35s per page). Connect a paid Nutrient PDF to Markdown plan to use it. ([benchmarks](#benchmarks))
 - **Three tools, one binary** — `pdf-to-markdown` for structured Markdown, `pdf-to-text` for layout-preserving plain text, and `query` for ranked search over an extracted file. Pick by what the downstream consumer needs. ([the Nutrient document CLI](#the-nutrient-document-cli))
 - **NEW: Image export** — `--enable-image-export` extracts images alongside Markdown for vision-capable LLMs. ([usage](#image-export))
 - **Where do my PDFs go?** — Nowhere. The CLI runs locally. Your documents are not uploaded to Nutrient. ([trust & licensing](#trust-and-licensing))
-- **What does it cost?** — Free for up to 1,000 documents per calendar month. No license key, no signup, no API token. ([license](LICENSE.md))
+- **What does it cost?** — You can start without signing up. The included free allowance covers standard conversion, and paid plans add Vision and higher allowances. ([plans](#plans-and-credits))
 
 ## The Nutrient document CLI
 
@@ -34,7 +34,7 @@ Fast, accurate Markdown from PDFs — locally, with no cleanup required. Built f
 
 All three install together from this package (and from the [Nutrient Skills](https://github.com/pspdfkit-labs/nutrient-skills) marketplace), and share one binary in `~/.local/share/nutrient/cli/`.
 
-> **Scanned or photographed documents?** The default engine is built for **digital-born** PDFs (a real text layer). For scanned, handwritten, or otherwise image-only documents you have two options: the licensed [`--vision` tier](#the---vision-tier) runs a machine-vision ICR pipeline locally on the same binary, and the [Nutrient Data Extraction API](https://www.nutrient.io/api/data-extraction-api/) adds schema-level structured extraction with per-value coordinates and confidence in the cloud.
+> **Scanned or photographed documents?** The default engine is built for **digital-born** PDFs (a real text layer). The [`--vision` tier](#the---vision-tier) handles scanned, handwritten, and otherwise image-only documents locally on the same binary.
 
 ## Install
 
@@ -109,7 +109,37 @@ After install, verify the commands are available:
 pdf-to-markdown --help
 pdf-to-text --help
 query --help
+nutrient auth --help
 ```
+
+The first argument after `nutrient` is reserved for CLI subcommands such as
+`auth` and `self-update`. Use `pdf-to-markdown`, `pdf-to-text`, or `query`
+directly for document work.
+
+## Connect an existing Nutrient account
+
+You can start converting right away. Sign in to use an existing Nutrient account or a paid plan:
+
+```bash
+nutrient auth login
+```
+
+The CLI prints a short code and opens a secure Nutrient page. Approve the request in your browser, then return to the terminal. Check your plan, remaining credits, Vision access, and locally pending usage at any time:
+
+```bash
+nutrient auth status
+```
+
+For CI and servers, create a secret key in the [PDF to Markdown dashboard](https://dashboard.nutrient.io/pdf-to-markdown/api_keys/) and keep it in the environment:
+
+```bash
+export NUTRIENT_API_KEY="pdf_live_..."
+pdf-to-markdown input.pdf output.md
+```
+
+Both conversion commands also accept `--api-key KEY`, but environment variables are safer because command arguments can appear in shell history and process listings.
+
+Credentials are resolved in this order: `--license-key`, `--api-key` or `NUTRIENT_API_KEY`, then a saved Nutrient login. If none is configured, the CLI uses its included free access. An invalid configured credential is an error; the CLI does not silently fall back.
 
 ## Usage
 
@@ -245,18 +275,32 @@ Nutrient and liteparse run batch-parallel; the other engines process sequentiall
 
 † Nutrient 1.3.0 added a machine-vision ICR pipeline behind the `--vision` flag: layout analysis, table reconstruction, formulas, and handwriting, running locally with GPU-hybrid inference (`--provider auto`; falls back to CPU). In this benchmark (1.3.1) it tops **every** accuracy metric — including table structure, where it beats docling outright — and at 0.35 s/page it is also faster than docling. There is no speed-for-accuracy trade against the open-source field.
 
-The first `--vision` run downloads the vision models (several hundred MB, cached locally afterward). Vision is a **licensed** capability: it requires a license key (`--license-key`) and is not part of the free tier. The default engine above remains free for up to 1,000 documents per calendar month. Contact `sales@nutrient.io` for a vision license.
+The first `--vision` run downloads the vision models (several hundred MB, cached locally afterward). Vision is included with paid Nutrient PDF to Markdown plans and uses 2 credits for each successful conversion. You can connect interactively with `nutrient auth login`, use `NUTRIENT_API_KEY` in automation, or continue using an existing commercial `--license-key`.
+
+## Plans and credits
+
+| Plan | Monthly credits | Vision |
+| --- | ---: | --- |
+| Free | 1,000 | — |
+| Starter | 5,000 | Included |
+| Growth | 25,000 | Included |
+| Pro | 100,000 | Included |
+
+A successful standard conversion uses 1 credit and a successful Vision conversion uses 2. `pdf-to-markdown` and `pdf-to-text` are metered the same way; `query` is free. Failed conversions use no credits. Allowances reset monthly, including on yearly plans. See the [live pricing page](https://www.nutrient.io/api/pricing/#api-pricing-pdf-to-markdown) for current details.
+
+The CLI can keep converting offline for up to an hour and 25 unreported credits. After either limit is reached, reconnect and retry. Existing `--license-key` workflows are unaffected.
 
 For the full comparison table, see [docs/benchmarks.md](docs/benchmarks.md).
 
 ## Trust and Licensing
 
-- Free for up to `1,000` documents per calendar month
+- Standard conversion starts with an included free allowance; no signup is required
+- Nutrient account plans provide monthly credits; Vision is included on paid plans
 - PDFs stay local — your documents are not uploaded to Nutrient by this extractor
-- A commercial license is required for processing more than `1,000` documents per month
-- The `--vision` ICR tier requires a separate license key (`--license-key`); without one, `--vision` refuses to run
+- Plan usage reports conversion mode, CLI version, command surface, an idempotent event identifier, and the identifier of the signed allowance — never document contents, names, paths, output, or page counts
+- Existing commercial/offline `--license-key` use continues unchanged
 - The extraction engine is delivered as a signed platform binary; the repo contains only the wrapper and documentation
-- The license is non-transferable — you may not redistribute the binary standalone or sublicense it to third parties; embedding it in your own application is permitted under the free tier terms
+- The license is non-transferable. Redistribution, OEM, embedded, and white-label use require a separate agreement with Nutrient.
 
 See [LICENSE.md](LICENSE.md) for the full terms and [docs/distribution-model.md](docs/distribution-model.md) for details on what ships in this repo vs. the binary.
 
@@ -268,15 +312,15 @@ Speed and accuracy should not be a tradeoff. Most extractors are either fast but
 
 ### What about scanned or handwritten documents?
 
-The **default engine** is built for digital-born PDFs that already contain a text layer and does not OCR. The licensed **`--vision` tier** (nutrient 1.3.0+) handles scanned, photographed, and handwritten documents locally with a machine-vision ICR pipeline — see [the `--vision` tier](#the---vision-tier). For schema-level structured extraction with per-value coordinates and confidence scores, use the [Nutrient Data Extraction API](https://www.nutrient.io/api/data-extraction-api/).
+The **default engine** is built for digital-born PDFs that already contain a text layer and does not OCR. The **`--vision` tier** handles scanned, photographed, and handwritten documents locally with a machine-vision ICR pipeline — see [the `--vision` tier](#the---vision-tier).
 
 ### Do my documents leave my machine?
 
-No. The CLI processes PDFs locally. Nothing is uploaded to Nutrient. Note that if you feed the extracted Markdown into Claude, Codex, or another model provider, their own data policies apply.
+No. The CLI processes PDFs locally. Nothing is uploaded to Nutrient. To enforce plan allowances, the CLI sends usage metadata, but not document contents, names, paths, output, or page counts. If you feed the extracted Markdown into Claude, Codex, or another model provider, their own data policies apply.
 
 ### Do I need a license key or API token?
 
-Not for the default engine. There is no signup, no license key, and no API token — install the CLI and start converting. The free tier (up to 1,000 documents per calendar month) is enforced via the [license terms](LICENSE.md), not a technical gate. The one exception is the **`--vision` tier**, which requires a license key. For vision licensing or processing more than 1,000 documents per month, contact `sales@nutrient.io`.
+No signup is required to start converting. Run `nutrient auth login` to use an existing Nutrient account, or set `NUTRIENT_API_KEY` for servers and CI. Vision requires a paid plan or an existing commercial `--license-key`.
 
 ### Why is the extraction engine closed-source?
 
