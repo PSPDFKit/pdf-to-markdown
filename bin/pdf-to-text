@@ -7,6 +7,16 @@ STATE_FILE="${STATE_DIR}/pdf-to-markdown-state"
 CHECK_INTERVAL_SECONDS=21600
 LATEST_URL="https://agent-cdn.nutrient.io/pdf-to-markdown/LATEST"
 CDN_PREFIX="https://agent-cdn.nutrient.io/pdf-to-markdown"
+MIN_ACCOUNT_CLI_VERSION="1.4.0"
+
+VERB_NAME="${NUTRIENT_WRAPPER_VERB:-pdf-to-text}"
+case "$VERB_NAME" in
+  nutrient|pdf-to-text) ;;
+  *)
+    echo "Unsupported wrapper command: $VERB_NAME" >&2
+    exit 1
+    ;;
+esac
 
 case "$(uname -s)/$(uname -m)" in
   Linux/aarch64)
@@ -132,6 +142,30 @@ write_state() {
 
 have_installed_binary() {
   [ -x "$NUTRIENT_CLI" ]
+}
+
+supports_nutrient_entry_point() {
+  version_output="$("$NUTRIENT_CLI" --version 2>/dev/null)" || return 1
+  case "$version_output" in
+    nutrient\ *) installed_version="${version_output#nutrient }" ;;
+    *) return 1 ;;
+  esac
+
+  awk -v installed="$installed_version" -v minimum="$MIN_ACCOUNT_CLI_VERSION" '
+    BEGIN {
+      if (split(installed, actual, ".") != 3 || split(minimum, required, ".") != 3)
+        exit 1
+      for (i = 1; i <= 3; i++) {
+        if (actual[i] !~ /^[0-9]+$/ || required[i] !~ /^[0-9]+$/)
+          exit 1
+        if ((actual[i] + 0) > (required[i] + 0))
+          exit 0
+        if ((actual[i] + 0) < (required[i] + 0))
+          exit 1
+      }
+      exit 0
+    }
+  '
 }
 
 download_to_stdout() {
@@ -474,6 +508,14 @@ refresh_if_needed() {
   esac
   load_state
 
+  # The nutrient entry point contains newer auth and account-management verbs
+  # that old conversion-only binaries do not understand. Always attempt a
+  # freshness check for this wrapper; an installed binary still provides the
+  # offline fallback if the CDN is unavailable.
+  if [ "$VERB_NAME" = "nutrient" ]; then
+    LAST_CHECKED_AT=""
+  fi
+
   if have_installed_binary; then
     INSTALL_READY=1
   fi
@@ -550,12 +592,17 @@ if ! selected_binary_exists "$NUTRIENT_CLI"; then
   exit 1
 fi
 
+if [ "$VERB_NAME" = "nutrient" ] && ! supports_nutrient_entry_point; then
+  echo "The installed Nutrient CLI does not support account commands. Connect to the internet and retry so it can be updated." >&2
+  exit 1
+fi
+
 # nutrient 1.1.0+ is multi-call: it reads its verb from argv[0]'s basename
 # (pdf-to-markdown / pdf-to-text / self-update). Pin the verb explicitly by
-# exec'ing a `pdf-to-text` symlink next to the platform binary, so the same
-# shared binary that backs pdf-to-markdown runs the pdf-to-text verb here.
-# Pre-1.1.0 binaries without verb dispatch fall back to positional argv.
-VERB_LINK="${INSTALL_DIR}/pdf-to-text"
+# exec'ing a symlink named for the selected command next to the platform
+# binary. Pre-1.1.0 binaries without verb dispatch fall back to positional
+# argv, preserving the old behavior.
+VERB_LINK="${INSTALL_DIR}/${VERB_NAME}"
 
 verb_link_is_valid() {
   [ -e "$VERB_LINK" ] || return 1

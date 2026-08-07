@@ -3,7 +3,7 @@ set -eu
 
 INSTALL_DIR="${INSTALL_DIR:-${HOME}/.local/bin}"
 RAW_BASE_URL="${RAW_BASE_URL:-https://raw.githubusercontent.com/PSPDFKit/pdf-to-markdown/main}"
-COMMANDS="pdf-to-markdown pdf-to-text query"
+COMMANDS="nutrient pdf-to-markdown pdf-to-text query"
 
 LOCAL_BIN_DIR=""
 TEMP_FILES=""
@@ -11,6 +11,7 @@ STAGED_TMP=""
 PDF_TO_MARKDOWN_TMP=""
 PDF_TO_TEXT_TMP=""
 QUERY_TMP=""
+NUTRIENT_TMP=""
 
 case "$0" in
   */install.sh|install.sh)
@@ -87,6 +88,7 @@ stage_command() {
 
 staged_path_for() {
   case "$1" in
+    nutrient) printf '%s\n' "$NUTRIENT_TMP" ;;
     pdf-to-markdown) printf '%s\n' "$PDF_TO_MARKDOWN_TMP" ;;
     pdf-to-text) printf '%s\n' "$PDF_TO_TEXT_TMP" ;;
     query) printf '%s\n' "$QUERY_TMP" ;;
@@ -103,6 +105,7 @@ for command_name in $COMMANDS; do
   stage_command "$command_name"
 
   case "$command_name" in
+    nutrient) NUTRIENT_TMP="$STAGED_TMP" ;;
     pdf-to-markdown) PDF_TO_MARKDOWN_TMP="$STAGED_TMP" ;;
     pdf-to-text) PDF_TO_TEXT_TMP="$STAGED_TMP" ;;
     query) QUERY_TMP="$STAGED_TMP" ;;

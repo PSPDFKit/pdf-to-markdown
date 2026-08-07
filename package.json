@@ -3,6 +3,7 @@
   "version": "0.5.1",
   "description": "Standalone CLI for Nutrient's document extractors — PDF to Markdown, PDF to text, and ranked query over extracted files",
   "bin": {
+    "nutrient": "bin/nutrient",
     "pdf-to-markdown": "bin/pdf-to-markdown",
     "pdf-to-text": "bin/pdf-to-text",
     "query": "bin/query"
@@ -16,7 +17,7 @@
     "install.sh"
   ],
   "scripts": {
-    "check": "sh -n ./install.sh && sh -n ./bin/pdf-to-markdown && sh -n ./bin/pdf-to-text && sh -n ./bin/query",
+    "check": "sh -n ./install.sh && sh -n ./bin/nutrient && sh -n ./bin/pdf-to-markdown && sh -n ./bin/pdf-to-text && sh -n ./bin/query",
     "pack:dry-run": "npm pack --dry-run"
   },
   "os": [

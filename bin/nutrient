@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+
+SCRIPT_DIR="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
+NUTRIENT_WRAPPER_VERB=nutrient
+export NUTRIENT_WRAPPER_VERB
+exec "$SCRIPT_DIR/pdf-to-markdown" "$@"

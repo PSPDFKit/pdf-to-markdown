@@ -1,79 +1,72 @@
-# Nutrient Free Use License
+# Nutrient PDF to Markdown License
+
+<!-- Legal review required before release. -->
 
 Copyright (c) Nutrient.io
 
-## 1. License Grant
+## 1. License grant
 
-Nutrient grants you a limited, non-exclusive, non-transferable, revocable license to use the accompanying software (the "Software") for internal business or personal purposes, subject to the terms of this License.
+Nutrient grants you a limited, non-exclusive, non-transferable, revocable license to use the accompanying software (the "Software") for internal business or personal purposes, subject to this License.
 
-## 2. Free Usage Tier
+The Software is licensed, not sold. Nutrient and its licensors retain all right, title, and interest in the Software.
 
-You may use the Software free of charge to process up to 1,000 documents per calendar month.
+## 2. Free use
 
-For the purposes of this License:
+You may use the Software under its included allowance to process up to 1,000 documents once per supported host installation. This allowance does not expire or renew.
 
-A "document" means any individual file submitted for processing by the Software, regardless of format.
+A "document" is an individual file submitted for processing by the Software. Each processing event counts as one document, including repeated processing of the same file. Searching previously converted output with `query` does not count as document processing.
 
-Each processing event counts as one document, including repeated or duplicate processing of the same file.
+## 3. Nutrient account plans
 
-## 3. Commercial Use
+You may sign in to use an existing Nutrient account plan, monthly conversion credits, and plan features.
 
-You must obtain a commercial license from Nutrient if you:
+Your subscription, account, credits, and payment are also governed by the terms presented when you create or manage the subscription. Current allowances, features, and prices are available at:
 
-Process more than 1,000 documents per calendar month
+https://www.nutrient.io/api/pricing/#api-pricing-pdf-to-markdown
 
-To obtain a commercial license, contact: sales@nutrient.io
+Vision requires an eligible paid Nutrient account plan or a separate commercial license key.
 
-## 4. Permitted Uses Within Free Tier
+## 4. Existing commercial licenses
 
-Subject to the 1,000 documents per calendar month limit, you may:
+An existing Nutrient commercial or offline license key remains governed by its applicable agreement. Contact Nutrient for enterprise terms or requirements that are not covered by a Nutrient account plan.
 
-Use the Software for internal or external purposes
+## 5. Redistribution and OEM use
 
-Incorporate the Software into applications, including hosted, SaaS, OEM, embedded, or white-labeled solutions
+This License does not permit you to redistribute, sublicense, white-label, embed, or provide the Software to third parties as part of another product or service. Those uses require a separate written agreement with Nutrient.
 
-Provide the Software's functionality to third parties
-
-## 5. Restrictions
+## 6. Restrictions
 
 You may not:
 
-Circumvent, disable, or interfere with usage limits or licensing controls
+- Circumvent, disable, or interfere with usage limits or licensing controls.
+- Use the Software to provide a product or service that competes with Nutrient's commercial offerings.
+- Remove or alter copyright, trademark, or proprietary notices.
+- Use the Software in violation of applicable laws or regulations.
 
-Use the Software to provide a service or product that competes with Nutrient's commercial offerings
+## 7. Usage data and document privacy
 
-Remove or alter any copyright, trademark, or proprietary notices
+Document conversion runs locally. The Software does not send document contents, file names, paths, converted output, or page counts to Nutrient for billing.
 
-Use the Software in violation of applicable laws or regulations
+To authorize and bill plan usage, the Software sends conversion metadata including an event identifier, conversion mode, command surface, CLI version, and the ID of the signed account allowance. To resume the same included allowance if local state is lost, the Software also sends a product-scoped hash derived from system identifiers. It does not send or store those raw identifiers. The Software may also collect analytics data as described in Nutrient's Privacy Policy.
 
-## 6. Ownership
+## 8. Termination
 
-The Software is licensed, not sold. Nutrient and its licensors retain all right, title, and interest in and to the Software.
+This License automatically terminates if you fail to comply with its terms. Upon termination, you must cease using the Software.
 
-## 7. Termination
+## 9. Disclaimer of warranties
 
-This License automatically terminates if you fail to comply with any of its terms.
+THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
 
-Upon termination, you must cease all use of the Software.
+## 10. Limitation of liability
 
-## 8. Disclaimer of Warranties
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, NUTRIENT WILL NOT BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR EXEMPLARY DAMAGES, INCLUDING LOSS OF PROFITS, DATA, OR USE, ARISING OUT OF OR RELATED TO THE SOFTWARE.
 
-THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+## 11. Governing law
 
-## 9. Limitation of Liability
+This License is governed by the laws of the State of North Carolina, without regard to conflict-of-law principles.
 
-TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL NUTRIENT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR EXEMPLARY DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, DATA, OR USE, ARISING OUT OF OR RELATED TO THE SOFTWARE.
+## 12. Third-party software
 
-## 10. Governing Law
+The Software incorporates third-party open source components. Acknowledgements are available at:
 
-This License shall be governed by and construed in accordance with the laws of the State of North Carolina, without regard to conflict of law principles.
-
-## 11. Usage Data
-
-The Software may collect and transmit usage data related to performance, feature usage, and document processing activity. This data does not include the contents of documents or personally identifiable information.
-
-By using the Software, you agree to the collection and use of such data in accordance with Nutrient's Privacy Policy.
-
-## 12. Third-Party Software
-
-This Software incorporates third-party open source components. A full list of acknowledgements is available at: https://www.nutrient.io/legal/acknowledgements/nutrient-cli-acknowledgements/
+https://www.nutrient.io/legal/acknowledgements/nutrient-cli-acknowledgements/
