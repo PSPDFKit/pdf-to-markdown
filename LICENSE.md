@@ -1,5 +1,7 @@
 # Nutrient PDF to Markdown License
 
+<!-- Legal review required before release. -->
+
 Copyright (c) Nutrient.io
 
 ## 1. License grant
@@ -10,9 +12,9 @@ The Software is licensed, not sold. Nutrient and its licensors retain all right,
 
 ## 2. Free use
 
-You may use the Software under its included free allowance to process up to 1,000 documents per calendar month.
+You may use the Software under its included allowance to process up to 1,000 documents once per supported host installation. This allowance does not expire or renew.
 
-A "document" is an individual file submitted for processing by the Software. Each processing event counts as one document, including repeated processing of the same file.
+A "document" is an individual file submitted for processing by the Software. Each processing event counts as one document, including repeated processing of the same file. Searching previously converted output with `query` does not count as document processing.
 
 ## 3. Nutrient account plans
 
@@ -45,7 +47,7 @@ You may not:
 
 Document conversion runs locally. The Software does not send document contents, file names, paths, converted output, or page counts to Nutrient for billing.
 
-To authorize and bill plan usage, the Software sends conversion metadata including an event identifier, conversion mode, command surface, CLI version, and the ID of the signed account allowance. The Software may also collect analytics data as described in Nutrient's Privacy Policy.
+To authorize and bill plan usage, the Software sends conversion metadata including an event identifier, conversion mode, command surface, CLI version, and the ID of the signed account allowance. To resume the same included allowance if local state is lost, the Software also sends a product-scoped hash derived from system identifiers. It does not send or store those raw identifiers. The Software may also collect analytics data as described in Nutrient's Privacy Policy.
 
 ## 8. Termination
 
