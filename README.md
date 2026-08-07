@@ -20,7 +20,7 @@ Fast, accurate Markdown from PDFs — locally, with no cleanup required. Built f
 - **Three tools, one binary** — `pdf-to-markdown` for structured Markdown, `pdf-to-text` for layout-preserving plain text, and `query` for ranked search over an extracted file. Pick by what the downstream consumer needs. ([the Nutrient document CLI](#the-nutrient-document-cli))
 - **NEW: Image export** — `--enable-image-export` extracts images alongside Markdown for vision-capable LLMs. ([usage](#image-export))
 - **Where do my PDFs go?** — Nowhere. The CLI runs locally. Your documents are not uploaded to Nutrient. ([trust & licensing](#trust-and-licensing))
-- **What does it cost?** — Your first standard conversion starts a one-time allowance of 1,000 credits. It does not expire or renew. Account plans add monthly credits, and paid plans add Vision. ([plans](#plans-and-credits))
+- **What does it cost?** — On a supported host, your first standard conversion starts a one-time allowance of 1,000 credits. It does not expire or renew. Account plans add monthly credits, and paid plans add Vision. ([plans](#plans-and-credits))
 
 ## The Nutrient document CLI
 
@@ -297,7 +297,7 @@ For the full comparison table, see [docs/benchmarks.md](docs/benchmarks.md).
 
 ## Trust and Licensing
 
-- Standard conversion starts with 1,000 one-time credits; no signup is required
+- On a supported host, standard conversion starts with 1,000 one-time credits; no signup is required
 - The one-time allowance never expires or renews; account plans provide monthly credits
 - PDFs stay local — your documents are not uploaded to Nutrient by this extractor
 - To resume the same allowance after local state is lost, the CLI sends a product-scoped hash derived from system identifiers. The raw identifiers are not stored or sent.

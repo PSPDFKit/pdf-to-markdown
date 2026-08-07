@@ -109,7 +109,7 @@ Only **one** parser produced actual figure images: **nutrient SDK**.
 | [`anthropic-claude-mythos-liteparse.md`](anthropic-claude-mythos-liteparse.md) | @llamaindex/liteparse | latest | |
 | [`anthropic-claude-mythos-pypdf.md`](anthropic-claude-mythos-pypdf.md) | pypdf | 6.9.2 | |
 
-The canonical **nutrient CLI** output (what the free `pdf-to-markdown` binary produces) is in the parent directory: [`../anthropic-claude-mythos-system-card.md`](../anthropic-claude-mythos-system-card.md)
+The canonical **nutrient CLI** output (what the `pdf-to-markdown` binary produces) is in the parent directory: [`../anthropic-claude-mythos-system-card.md`](../anthropic-claude-mythos-system-card.md)
 
 ## Reproducing this comparison
 
