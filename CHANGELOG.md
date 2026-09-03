@@ -3,7 +3,7 @@
 ## Unreleased
 
 - Added the `nutrient` entry point and `nutrient auth login`, `status`, and `logout` workflows.
-- Added Document Web Services (DWS) plan credits, Vision access, API-key authentication, offline entitlement handling, and durable usage reporting to both conversion commands.
+- Added Nutrient sign-in, Vision access through account plans or API keys, offline Vision support, and usage reporting to both conversion commands.
 - Kept basic local conversion and existing `--license-key` workflows backward compatible.
 
 ## 0.5.1 — 2026-07-23

@@ -8,7 +8,7 @@ Evaluated on 200 PDF documents with hand-annotated Markdown ground truth from th
 - Metrics: NID (reading order), TEDS (table structure), MHS (heading hierarchy)
 - All scores normalized to [0, 1] — higher is better
 - All competitor libraries pinned to their latest versions as of the benchmark date
-- Nutrient `--vision` is the paid-plan machine-vision ICR tier of the same binary (`--provider auto`); its numbers below are from the 1.3.1 build, which is ~3× faster than 1.3.0 (1.045 → 0.354 s/page) with accuracy identical to four decimals
+- Nutrient `--vision` is the local Vision tier of the same binary (`--provider auto`); its numbers below are from the 1.3.1 build, which is ~3× faster than 1.3.0 (1.045 → 0.354 s/page) with accuracy identical to four decimals
 
 ## Accuracy Metrics
 
@@ -50,4 +50,4 @@ Nutrient and liteparse convert batch-parallel; the other engines run sequentiall
 
 ## Reproduction
 
-Run on the private `PSPDFKit-labs/opendataloader-bench` harness (branch `benchmark-update-with-new-parsers`): `uv run src/pdf_parser.py --engine <name>` then `uv run src/evaluator.py --engine <name>`. The vision arm uses the `nutrient-vision-cli` engine with the 1.3.1 CDN binary and an authenticated paid plan.
+Run on the private `PSPDFKit-labs/opendataloader-bench` harness (branch `benchmark-update-with-new-parsers`): `uv run src/pdf_parser.py --engine <name>` then `uv run src/evaluator.py --engine <name>`. The vision arm uses the `nutrient-vision-cli` engine with the 1.3.1 CDN binary and authenticated Vision access.

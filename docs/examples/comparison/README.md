@@ -16,11 +16,11 @@ The canonical Nutrient CLI output is one level up: [`../anthropic-claude-mythos-
 | Headings | 265 | 265 | 287 | 258 | 0 | 0 |
 | Table rows | 398 | 398 | 420 | 422 | 0 | 0 |
 | **Figures extracted** | 0 | **110** | 0 | 0 | 0 | 0 |
-| Cost | Included allowance | Free trial | Free | Free | Free | Free |
+| Cost | Free | Free trial | Free | Free | Free | Free |
 
 ## The two Nutrient tiers
 
-1. **[Nutrient CLI](..)** — the `pdf-to-markdown` binary in this repo. Heuristic extraction, no ML models, with 1,000 one-time included credits. Wins on speed and produces clean markdown tables and headings.
+1. **[Nutrient CLI](..)** — the `pdf-to-markdown` binary in this repo. Standard conversion is free, uses no ML models, and wins on speed while producing clean Markdown tables and headings.
 
 2. **[Python SDK](https://pypi.org/project/nutrient-sdk/)** (`nutrient-sdk` v1.0.4) — the premium engine with OCR, ICR, Vision, and image extraction. Everything the CLI does, plus every figure in the document rendered to an actual image file.
 

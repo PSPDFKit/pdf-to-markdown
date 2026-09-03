@@ -1,7 +1,5 @@
 # Nutrient PDF to Markdown License
 
-<!-- Legal review required before release. -->
-
 Copyright (c) Nutrient.io
 
 ## 1. License grant
@@ -12,19 +10,15 @@ The Software is licensed, not sold. Nutrient and its licensors retain all right,
 
 ## 2. Free use
 
-You may use the Software under its included allowance to process up to 1,000 documents once per supported host installation. This allowance does not expire or renew.
-
-A "document" is an individual file submitted for processing by the Software. Each processing event counts as one document, including repeated processing of the same file. Searching previously converted output with `query` does not count as document processing.
+Standard conversion and `query` are free and do not require a Nutrient account. They do not use Vision pages. A connection problem does not prevent Standard conversion.
 
 ## 3. Nutrient account plans
 
-You may sign in to use an existing Nutrient account plan, monthly conversion credits, and plan features.
+Vision requires a Nutrient account, API key, or existing SDK license. With an account or API key, each input page uses one Vision page from your monthly allowance. Failed conversions do not use Vision pages.
 
-Your subscription, account, credits, and payment are also governed by the terms presented when you create or manage the subscription. Current allowances, features, and prices are available at:
+Your subscription, account, and payment are also governed by the terms presented when you create or manage the subscription. Current allowances, features, and prices are available at:
 
 https://www.nutrient.io/api/pricing/#api-pricing-pdf-to-markdown
-
-Vision requires an eligible paid Nutrient account plan or a separate commercial license key.
 
 ## 4. Existing commercial licenses
 
@@ -45,9 +39,11 @@ You may not:
 
 ## 7. Usage data and document privacy
 
-Document conversion runs locally. The Software does not send document contents, file names, paths, converted output, or page counts to Nutrient for billing.
+Document conversion and `query` run locally. The Software does not send document contents, file names, paths, or converted output to Nutrient.
 
-To authorize and bill plan usage, the Software sends conversion metadata including an event identifier, conversion mode, command surface, CLI version, and the ID of the signed account allowance. To resume the same included allowance if local state is lost, the Software also sends a product-scoped hash derived from system identifiers. It does not send or store those raw identifiers. The Software may also collect analytics data as described in Nutrient's Privacy Policy.
+For conversion usage, the Software may send a random event identifier, the command, Standard or Vision mode, input page count, time, CLI version, and the identifier needed to associate the usage with an account or installation. Standard usage reporting is best effort and does not block conversion.
+
+To identify an installation, the Software creates a product-specific, non-reversible hash from system identifiers. It does not send the raw system identifiers used to create that hash, and the hash cannot restore a lost sign-in. The Software may also collect analytics data as described in Nutrient's Privacy Policy.
 
 ## 8. Termination
 
