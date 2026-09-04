@@ -1,10 +1,10 @@
 # Distribution Model
 
-This repository is designed to make the v0.5.x CLI easy to evaluate and install without exposing the proprietary extraction engine.
+This repository makes the Nutrient CLI easy to evaluate and install without exposing the proprietary extraction engine.
 
 ## What Stays In This Repo
 
-- public wrapper logic in [bin/pdf-to-markdown](../bin/pdf-to-markdown), [bin/pdf-to-text](../bin/pdf-to-text), and [bin/query](../bin/query) — three thin wrappers over one shared binary
+- public wrapper logic in [bin/nutrient](../bin/nutrient), [bin/pdf-to-markdown](../bin/pdf-to-markdown), [bin/pdf-to-text](../bin/pdf-to-text), and [bin/query](../bin/query) — four thin wrappers over one shared binary
 - installer in [install.sh](../install.sh)
 - package metadata in [package.json](../package.json)
 - public README and benchmark snapshots
@@ -36,7 +36,7 @@ The public CLI wrapper relies on a very small, stable contract:
    - `nutrient-windows-arm64.exe`
 4. A release may provide a checksum sidecar named `<target>.tar.gz.sha256` beside each tarball. The wrapper reads the first 64-character hexadecimal token and compares it with the archive's SHA-256 digest. A mismatch stops installation. If the sidecar cannot be downloaded or no supported SHA-256 tool is available, installation proceeds by default; set `NUTRIENT_REQUIRE_CHECKSUM=1` to require verification and fail when either is unavailable.
 
-The wrappers create `argv[0]` verb links named `pdf-to-markdown`, `pdf-to-text`, and `query`: symlinks where supported, or copies when Git Bash uses copy semantics. The shared binary selects its verb from the invoked name, so all three commands dispatch through the same target-specific binary.
+The wrappers create `argv[0]` command links named `nutrient`, `pdf-to-markdown`, `pdf-to-text`, and `query`: symlinks where supported, or copies when Git Bash uses copy semantics. The shared binary selects its command from the invoked name, so all four commands dispatch through the same target-specific binary.
 
 As long as that contract remains stable, the public wrappers can stay small and the proprietary engine can remain fully private.
 

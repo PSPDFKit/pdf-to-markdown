@@ -590,11 +590,10 @@ if ! selected_binary_exists "$NUTRIENT_CLI"; then
 fi
 # END SHARED INSTALL WRAPPER
 
-# nutrient 1.1.0+ is multi-call: it reads its verb from argv[0]'s basename
-# (pdf-to-markdown / pdf-to-text / self-update). Pin the verb explicitly by
-# exec'ing a symlink named for the selected command next to the platform
-# binary. Pre-1.1.0 binaries without verb dispatch fall back to positional
-# argv, preserving the old behavior.
+# nutrient 1.1.0+ is multi-call: it reads its command from argv[0]'s basename.
+# Pin the command explicitly by exec'ing a symlink named for the selected
+# command next to the platform binary. Pre-1.1.0 binaries without verb dispatch
+# fall back to positional argv, preserving the old behavior.
 VERB_LINK="${INSTALL_DIR}/${VERB_NAME}"
 
 verb_link_is_valid() {
