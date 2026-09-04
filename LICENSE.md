@@ -14,7 +14,7 @@ Standard conversion and `query` are free and do not require a Nutrient account. 
 
 ## 3. Nutrient account plans
 
-Vision requires a Nutrient account, API key, or existing SDK license. With an account or API key, each input page uses one Vision page from your monthly allowance. Failed conversions do not use Vision pages.
+Vision requires a Nutrient account, an API key, or a Nutrient CLI license key. With an account or API key, each input page uses one Vision page from your monthly allowance. Failed conversions do not use Vision pages.
 
 Your subscription, account, and payment are also governed by the terms presented when you create or manage the subscription. Current allowances, features, and prices are available at:
 

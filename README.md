@@ -16,7 +16,7 @@ Fast, accurate Markdown from PDFs — locally, with no cleanup required. Built f
 
 - **How fast is it?** — 0.004s per page. 134x faster than docling, 53x faster than pymupdf4llm. ([benchmarks](#benchmarks))
 - **How accurate is it?** — 0.93 reading order (best in class), 0.89 overall extraction accuracy, 0.82 heading detection. ([benchmarks](#benchmarks))
-- **`--vision` tier** — a local Vision pipeline that tops every accuracy metric, including tables (0.94 TEDS), handles scanned and handwritten documents — and still runs faster than docling (0.35s per page). Use a Nutrient account, API key, or existing SDK license. ([benchmarks](#benchmarks))
+- **`--vision` tier** — a local Vision pipeline that tops every accuracy metric, including tables (0.94 TEDS), handles scanned and handwritten documents — and still runs faster than docling (0.35s per page). Use a Nutrient account, an API key, or a Nutrient CLI license key. ([benchmarks](#benchmarks))
 - **Three tools, one binary** — `pdf-to-markdown` for structured Markdown, `pdf-to-text` for layout-preserving plain text, and `query` for ranked search over an extracted file. Pick by what the downstream consumer needs. ([the Nutrient document CLI](#the-nutrient-document-cli))
 - **NEW: Image export** — `--enable-image-export` extracts images alongside Markdown for vision-capable LLMs. ([usage](#image-export))
 - **Where do my PDFs go?** — Nowhere. The CLI runs locally. Your documents are not uploaded to Nutrient. ([trust & licensing](#trust-and-licensing))
@@ -141,7 +141,7 @@ pdf-to-markdown --vision input.pdf output.md
 
 Both conversion commands also accept `--api-key KEY`, but environment variables are safer because command arguments can appear in shell history and process listings.
 
-The CLI uses an existing SDK license first, then an API key, and then your saved Nutrient sign-in. Without any of these, Standard still works and Vision asks you to sign in. An invalid key or expired sign-in is reported as an error; the CLI doesn’t quietly switch to another account.
+The CLI uses a Nutrient CLI license key first, then an API key, and then your saved Nutrient sign-in. Without any of these, Standard still works and Vision asks you to sign in. An invalid key or expired sign-in is reported as an error; the CLI doesn’t quietly switch to another account.
 
 ## Usage
 
@@ -283,7 +283,7 @@ The first `--vision` run downloads the vision models (several hundred MB, cached
 
 Standard conversion and `query` are free and don’t use Vision pages. The CLI tries to report Standard usage, but a connection problem doesn’t stop the conversion.
 
-Vision improves results for scanned pages, handwriting, formulas, and complex tables. It requires a Nutrient account, API key, or existing SDK license. See the [live pricing page](https://www.nutrient.io/api/pricing/pdf-to-markdown/) for current allowances and prices.
+Vision improves results for scanned pages, handwriting, formulas, and complex tables. It requires a Nutrient account, an API key, or a Nutrient CLI license key. See the [live pricing page](https://www.nutrient.io/api/pricing/pdf-to-markdown/) for current allowances and prices.
 
 Standard conversion can continue when Nutrient is unavailable. After Vision connects, it can work offline for one hour and process up to 100 pages before it must reconnect. A document that crosses the 100-page threshold can finish. Existing `--license-key` workflows continue to work offline.
 
