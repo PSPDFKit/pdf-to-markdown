@@ -81,7 +81,9 @@ Or run it without a global install:
 npx @pspdfkit/pdf-to-markdown --help
 ```
 
-The package supports Node `18+` on macOS Apple Silicon, Linux x86_64, Linux arm64, and Windows (x64 and arm64). On Windows the commands run under Git Bash, which ships with [Git for Windows](https://git-scm.com/download/win) and is what agent tools like Claude Code already use for their shell.
+The package supports Node `18+` on macOS 13 or newer with Apple Silicon, Linux x86_64, Linux arm64, and Windows (x64 and arm64). On Windows the commands run under Git Bash, which ships with [Git for Windows](https://git-scm.com/download/win) and is what agent tools like Claude Code already use for their shell.
+
+On Linux, use a distribution with glibc 2.38 or newer. The CLI also needs libcurl 4, ICU, and OpenSSL 3. For a minimal Ubuntu 24.04 image, install them with `apt-get install libcurl4t64 libicu74 ca-certificates`.
 
 If you prefer a shell installer, keep the curl fallback:
 
@@ -203,9 +205,9 @@ The wrapper keeps the downloaded binary current. It checks for a newer release a
 
 ## Platform Support
 
-- macOS Apple Silicon (`Darwin/arm64`)
-- Linux x86_64
-- Linux arm64
+- macOS 13 or newer on Apple Silicon (`Darwin/arm64`)
+- Linux x86_64 (glibc 2.38 or newer)
+- Linux arm64 (glibc 2.38 or newer)
 - Windows x64
 - Windows arm64
 
