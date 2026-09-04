@@ -1,6 +1,6 @@
 {
   "name": "@pspdfkit/pdf-to-markdown",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Standalone CLI for Nutrient's document extractors — PDF to Markdown, PDF to text, and ranked query over extracted files",
   "bin": {
     "nutrient": "bin/nutrient",

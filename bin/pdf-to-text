@@ -7,17 +7,19 @@ STATE_FILE="${STATE_DIR}/pdf-to-markdown-state"
 CHECK_INTERVAL_SECONDS=21600
 LATEST_URL="https://agent-cdn.nutrient.io/pdf-to-markdown/LATEST"
 CDN_PREFIX="https://agent-cdn.nutrient.io/pdf-to-markdown"
-MIN_ACCOUNT_CLI_VERSION="1.4.0"
 
+FORCE_FRESHNESS_CHECK=0
 VERB_NAME="${NUTRIENT_WRAPPER_VERB:-pdf-to-text}"
 case "$VERB_NAME" in
-  nutrient|pdf-to-text) ;;
+  nutrient) FORCE_FRESHNESS_CHECK=1 ;;
+  pdf-to-text) ;;
   *)
     echo "Unsupported wrapper command: $VERB_NAME" >&2
     exit 1
     ;;
 esac
 
+# BEGIN SHARED INSTALL WRAPPER
 case "$(uname -s)/$(uname -m)" in
   Linux/aarch64)
     TARGET_ID="linux-arm64"
@@ -64,6 +66,13 @@ release_install_lock() {
   if [ "$INSTALL_LOCK_HELD" -eq 1 ]; then
     rm -rf "$INSTALL_LOCK_PATH" || return 1
     INSTALL_LOCK_HELD=0
+  fi
+}
+
+release_install_lock_or_exit() {
+  if ! release_install_lock; then
+    echo "Failed to release install lock: $INSTALL_LOCK_PATH" >&2
+    exit 1
   fi
 }
 
@@ -142,30 +151,6 @@ write_state() {
 
 have_installed_binary() {
   [ -x "$NUTRIENT_CLI" ]
-}
-
-supports_nutrient_entry_point() {
-  version_output="$("$NUTRIENT_CLI" --version 2>/dev/null)" || return 1
-  case "$version_output" in
-    nutrient\ *) installed_version="${version_output#nutrient }" ;;
-    *) return 1 ;;
-  esac
-
-  awk -v installed="$installed_version" -v minimum="$MIN_ACCOUNT_CLI_VERSION" '
-    BEGIN {
-      if (split(installed, actual, ".") != 3 || split(minimum, required, ".") != 3)
-        exit 1
-      for (i = 1; i <= 3; i++) {
-        if (actual[i] !~ /^[0-9]+$/ || required[i] !~ /^[0-9]+$/)
-          exit 1
-        if ((actual[i] + 0) > (required[i] + 0))
-          exit 0
-        if ((actual[i] + 0) < (required[i] + 0))
-          exit 1
-      }
-      exit 0
-    }
-  '
 }
 
 download_to_stdout() {
@@ -256,15 +241,17 @@ compute_sha256() {
 
   if command -v sha256sum >/dev/null 2>&1; then
     checksum_output="$(sha256sum "$checksum_file" 2>/dev/null)" || return 1
+    checksum_hash="$(printf '%s\n' "$checksum_output" | awk '{ print $1 }')"
   elif command -v shasum >/dev/null 2>&1; then
     checksum_output="$(shasum -a 256 "$checksum_file" 2>/dev/null)" || return 1
+    checksum_hash="$(printf '%s\n' "$checksum_output" | awk '{ print $1 }')"
   elif command -v openssl >/dev/null 2>&1; then
     checksum_output="$(openssl dgst -sha256 "$checksum_file" 2>/dev/null)" || return 1
+    checksum_hash="$(printf '%s\n' "$checksum_output" | awk '{ print $NF }')"
   else
     return 2
   fi
 
-  checksum_hash="$(printf '%s\n' "$checksum_output" | awk '{ print $NF }')"
   case "$checksum_hash" in
     *[!A-Fa-f0-9]*|'') return 1 ;;
   esac
@@ -487,14 +474,19 @@ release_is_older() {
 }
 
 refresh_if_needed() {
-  mkdir -p "$STATE_DIR" "$INSTALL_DIR" || {
-    echo "Failed to create install directories" >&2
+  mkdir -p "$STATE_DIR" || {
+    echo "Failed to create state directory" >&2
     exit 1
   }
-  chmod go-w "$STATE_DIR" "$INSTALL_DIR" || {
-    echo "Failed to secure install directory permissions" >&2
+  chmod go-w "$STATE_DIR" || {
+    echo "Failed to secure state directory permissions" >&2
     exit 1
   }
+
+  if ! acquire_install_lock; then
+    echo "Timed out waiting for install lock: $INSTALL_LOCK_PATH" >&2
+    exit 1
+  fi
 
   now="$(date +%s)" || {
     echo "Failed to read the current time" >&2
@@ -507,12 +499,18 @@ refresh_if_needed() {
       ;;
   esac
   load_state
+  INSTALL_READY=0
 
-  # The nutrient entry point contains newer auth and account-management verbs
-  # that old conversion-only binaries do not understand. Always attempt a
-  # freshness check for this wrapper; an installed binary still provides the
-  # offline fallback if the CDN is unavailable.
-  if [ "$VERB_NAME" = "nutrient" ]; then
+  if [ -e "$INSTALL_DIR" ] || [ -L "$INSTALL_DIR" ]; then
+    chmod go-w "$INSTALL_DIR" || {
+      echo "Failed to secure install directory permissions" >&2
+      exit 1
+    }
+  fi
+
+  # Account commands require a current binary, so their launcher always checks
+  # the release channel before deciding whether the cached binary is usable.
+  if [ "$FORCE_FRESHNESS_CHECK" -eq 1 ]; then
     LAST_CHECKED_AT=""
   fi
 
@@ -529,11 +527,13 @@ refresh_if_needed() {
   fi
 
   if [ "$INSTALL_READY" -eq 1 ] && [ "$should_check" -eq 0 ]; then
+    release_install_lock_or_exit
     return 0
   fi
 
   latest_release_id="$(fetch_latest_release_id)" || {
     if [ "$INSTALL_READY" -eq 1 ]; then
+      release_install_lock_or_exit
       return 0
     fi
     echo "Failed to fetch latest pdf-to-markdown release id" >&2
@@ -546,43 +546,40 @@ refresh_if_needed() {
   fi
 
   if [ "$INSTALL_READY" -eq 1 ] && [ "$latest_release_id" = "$RELEASE_ID" ]; then
-    write_state "$now" "$latest_release_id" || return 1
+    if ! write_state "$now" "$latest_release_id"; then
+      release_install_lock_or_exit
+      return 1
+    fi
+    release_install_lock_or_exit
     return 0
   fi
 
   latest_archive_url="$(archive_url_for_release "$latest_release_id")" || {
     if [ "$INSTALL_READY" -eq 1 ]; then
+      release_install_lock_or_exit
       return 0
     fi
     echo "Failed to build archive URL for release $latest_release_id" >&2
     exit 1
   }
 
-  if ! acquire_install_lock; then
-    if have_installed_binary; then
-      echo "Install lock busy; continuing with existing binary: $INSTALL_LOCK_PATH" >&2
-      return 0
-    fi
-    echo "Timed out waiting for install lock: $INSTALL_LOCK_PATH" >&2
-    exit 1
-  fi
-
   install_status=0
   install_archive "$latest_archive_url" || install_status=$?
-  if ! release_install_lock; then
-    echo "Failed to release install lock: $INSTALL_LOCK_PATH" >&2
-    exit 1
-  fi
 
   if [ "$install_status" -ne 0 ]; then
     if have_installed_binary; then
+      release_install_lock_or_exit
       return 0
     fi
     echo "Failed to install pdf-to-markdown archive for $TARGET_ID" >&2
     exit 1
   fi
 
-  write_state "$now" "$latest_release_id" || return 1
+  if ! write_state "$now" "$latest_release_id"; then
+    release_install_lock_or_exit
+    return 1
+  fi
+  release_install_lock_or_exit
 }
 
 refresh_if_needed
@@ -591,11 +588,7 @@ if ! selected_binary_exists "$NUTRIENT_CLI"; then
   echo "Binary not found or install is incomplete: $NUTRIENT_CLI" >&2
   exit 1
 fi
-
-if [ "$VERB_NAME" = "nutrient" ] && ! supports_nutrient_entry_point; then
-  echo "The installed Nutrient CLI does not support account commands. Connect to the internet and retry so it can be updated." >&2
-  exit 1
-fi
+# END SHARED INSTALL WRAPPER
 
 # nutrient 1.1.0+ is multi-call: it reads its verb from argv[0]'s basename
 # (pdf-to-markdown / pdf-to-text / self-update). Pin the verb explicitly by
@@ -643,6 +636,19 @@ if ! verb_link_is_valid; then
   else
     VERB_LINK_TMP=""
   fi
+fi
+
+supports_nutrient_auth() {
+  auth_help="$("$VERB_LINK" auth --help 2>/dev/null)" || return 1
+  case "$auth_help" in
+    *" auth login"*" auth status"*" auth logout"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+if [ "$VERB_NAME" = "nutrient" ] && ! supports_nutrient_auth; then
+  echo "The installed Nutrient CLI does not support account commands. Connect to the internet and retry so it can be updated." >&2
+  exit 1
 fi
 
 exec "$VERB_LINK" "$@"
