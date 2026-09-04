@@ -11,7 +11,6 @@
   "files": [
     "bin",
     "docs/benchmarks.md",
-    "docs/distribution-model.md",
     "README.md",
     "LICENSE.md",
     "install.sh"

@@ -4,7 +4,7 @@
 
 - Added the `nutrient` entry point and `nutrient auth login`, `status`, and `logout` workflows.
 - Added Nutrient sign-in, Vision access through account plans or API keys, offline Vision support, and usage reporting to both conversion commands.
-- Kept basic local conversion and existing `--license-key` workflows backward compatible.
+- Kept Standard conversion free and existing Nutrient CLI license-key workflows backward compatible.
 - Fixed release-download verification on macOS and Linux, and made concurrent starts safe while the CLI updates.
 
 ## 0.5.1 — 2026-07-23
