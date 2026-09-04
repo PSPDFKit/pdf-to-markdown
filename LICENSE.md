@@ -18,7 +18,7 @@ Vision requires a Nutrient account, API key, or existing SDK license. With an ac
 
 Your subscription, account, and payment are also governed by the terms presented when you create or manage the subscription. Current allowances, features, and prices are available at:
 
-https://www.nutrient.io/api/pricing/#api-pricing-pdf-to-markdown
+https://www.nutrient.io/api/pricing/pdf-to-markdown/
 
 ## 4. Existing commercial licenses
 
