@@ -136,7 +136,7 @@ Standard also works without an account in containers and continuous integration 
 
 ```bash
 export NUTRIENT_API_KEY="pdf_live_..."
-pdf-to-markdown input.pdf output.md
+pdf-to-markdown --vision input.pdf output.md
 ```
 
 Both conversion commands also accept `--api-key KEY`, but environment variables are safer because command arguments can appear in shell history and process listings.
