@@ -22,7 +22,7 @@ Convert PDFs to clean Markdown locally. The CLI works with Claude, Codex, RAG pi
 
 ## The Nutrient CLI
 
-`pdf-to-markdown` is one command in a signed CLI that converts digital PDFs locally. Convert a PDF once, then use the output in your workflow:
+`pdf-to-markdown` is one command in the Nutrient CLI, which converts digital PDFs locally. Convert a PDF once, then use the output in your workflow:
 
 | Command | What it does | Use it when |
 | --- | --- | --- |
