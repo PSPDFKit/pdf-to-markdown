@@ -2,21 +2,21 @@
 
 Evaluated on 200 PDF documents with hand-annotated Markdown ground truth from the DP-Bench corpus.
 
-- Benchmark date: `2026-07-06` (vision arm re-run `2026-07-07` on nutrient 1.3.1)
+- Benchmark date: `2026-07-06` (Vision rerun on `2026-07-07` with Nutrient 1.3.1)
 - Corpus: 200 documents with ground-truth Markdown annotations (42 with tables, 107 with headings)
 - Hardware: Apple M3 Ultra (no discrete GPU)
 - Metrics: NID (reading order), TEDS (table structure), MHS (heading hierarchy)
 - All scores normalized to [0, 1] — higher is better
 - All competitor libraries pinned to their latest versions as of the benchmark date
-- Nutrient `--vision` is the licensed machine-vision ICR tier of the same binary (`--provider auto`); its numbers below are from the 1.3.1 build, which is ~3× faster than 1.3.0 (1.045 → 0.354 s/page) with accuracy identical to four decimals
+- Vision runs locally in the same binary. The 1.3.1 result below uses `--provider auto`; it was about three times faster than 1.3.0 (1.045 → 0.354 seconds per page) with the same accuracy to four decimal places.
 
-## Accuracy Metrics
+## Accuracy metrics
 
 | Solution | Version | Extraction accuracy | Reading order (NID) | Table structure (TEDS) | Heading level (MHS) |
 | --- | --- | ---: | ---: | ---: | ---: |
-| **Nutrient `--vision`** | 1.3.1 | **0.933** | **0.959** | **0.938** | **0.868** |
+| **Nutrient Vision** | 1.3.1 | **0.933** | **0.959** | **0.938** | **0.868** |
 | docling | 2.110.0 | 0.892 | 0.905 | 0.933 | 0.829 |
-| **Nutrient** | 1.3.0 | 0.889 | 0.926 | 0.739 | 0.824 |
+| **Nutrient Standard** | 1.3.0 | 0.889 | 0.926 | 0.739 | 0.824 |
 | pymupdf4llm | 1.28.0 | 0.859 | 0.902 | 0.731 | 0.777 |
 | opendataloader | 2.4.7 | 0.831 | 0.902 | 0.483 | 0.739 |
 | markitdown | 0.1.6 | 0.589 | 0.844 | 0.273 | 0.000 |
@@ -29,25 +29,25 @@ Evaluated on 200 PDF documents with hand-annotated Markdown ground truth from th
 
 | Solution | Seconds per page |
 | --- | ---: |
-| **Nutrient** | **0.004** |
+| **Nutrient Standard** | **0.004** |
 | liteparse | 0.004 |
 | opendataloader | 0.015 |
 | pypdf | 0.015 |
 | markitdown | 0.069 |
 | pymupdf4llm | 0.218 |
-| Nutrient `--vision` | 0.354 |
+| Nutrient Vision | 0.354 |
 | docling | 0.549 |
 
-Nutrient and liteparse convert batch-parallel; the other engines run sequentially in-process. Timing is wall-clock over the whole corpus on the hardware above. The `--vision` timing is per-document invocation; a single batch invocation over all 200 documents times the same (0.356 s/page), so process startup and model initialization are negligible once the models are cached.
+Nutrient and LiteParse processed batches in parallel; the other tools processed documents sequentially. Timing is wall-clock over the whole corpus on the hardware above. Vision took 0.354 seconds per page when invoked once per document and 0.356 seconds per page in one 200-document batch, after the models were cached.
 
-## Relative Speed Callouts (default engine)
+## Relative speed of Standard
 
-- Nutrient is `134x` faster than `docling`
-- Nutrient is `53x` faster than `pymupdf4llm`
-- Nutrient is `17x` faster than `markitdown`
-- Nutrient is `4x` faster than `pypdf`
-- Nutrient is `4x` faster than `opendataloader`
+- Nutrient Standard is `134x` faster than `docling`
+- Nutrient Standard is `53x` faster than `pymupdf4llm`
+- Nutrient Standard is `17x` faster than `markitdown`
+- Nutrient Standard is `4x` faster than `pypdf`
+- Nutrient Standard is `4x` faster than `opendataloader`
 
 ## Reproduction
 
-Run on the private `PSPDFKit-labs/opendataloader-bench` harness (branch `benchmark-update-with-new-parsers`): `uv run src/pdf_parser.py --engine <name>` then `uv run src/evaluator.py --engine <name>`. The vision arm uses the `nutrient-vision-cli` engine with the 1.3.1 CDN binary (requires a vision license key).
+The corpus, evaluation method, and public Standard results are available in the [OpenDataLoader benchmark](https://github.com/opendataloader-project/opendataloader-bench). We ran Vision internally against the same corpus and evaluation method because it requires authenticated access.

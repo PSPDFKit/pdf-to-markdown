@@ -27,18 +27,41 @@ jobs:
 
       - name: Run ShellCheck
         if: runner.os == 'Linux'
-        run: shellcheck -s sh install.sh bin/pdf-to-markdown bin/pdf-to-text bin/query
+        run: shellcheck -s sh install.sh bin/nutrient bin/pdf-to-markdown bin/pdf-to-text bin/query
 
       - name: Check shell syntax
         run: npm run check
+
+      - name: Reject an old cached binary for account commands
+        if: runner.os == 'Linux'
+        run: |
+          test_root="$(mktemp -d)"
+          trap 'rm -rf "$test_root"' EXIT
+          mkdir -p "$test_root/home/.local/share/nutrient/cli" "$test_root/fake-bin"
+
+          printf '%s\n' '#!/bin/sh' 'echo "nutrient 1.3.1"' \
+            > "$test_root/home/.local/share/nutrient/cli/nutrient-linux-amd64"
+          printf '%s\n' '#!/bin/sh' 'exit 1' > "$test_root/fake-bin/curl"
+          chmod +x \
+            "$test_root/home/.local/share/nutrient/cli/nutrient-linux-amd64" \
+            "$test_root/fake-bin/curl"
+
+          if HOME="$test_root/home" PATH="$test_root/fake-bin:$PATH" \
+            ./bin/nutrient auth status > "$test_root/output" 2>&1; then
+            echo "Old cached binary was accepted" >&2
+            exit 1
+          fi
+          grep -F "does not support account commands" "$test_root/output"
 
       - name: Verify installer copies local wrapper
         run: |
           tmpdir="$(mktemp -d)"
           INSTALL_DIR="$tmpdir/bin" ./install.sh
+          test -x "$tmpdir/bin/nutrient"
           test -x "$tmpdir/bin/pdf-to-markdown"
           test -x "$tmpdir/bin/pdf-to-text"
           test -x "$tmpdir/bin/query"
+          sh -n "$tmpdir/bin/nutrient"
 
       - name: Verify npm pack surface
         run: npm pack --dry-run

@@ -8,9 +8,9 @@ The canonical Nutrient CLI output is one level up: [`../anthropic-claude-mythos-
 
 ## TL;DR
 
-**The free heuristic CLI is already competitive with the best open-source tools, and 75× faster.** The premium Python SDK adds what none of them can: every figure and chart, extracted losslessly.
+**The heuristic CLI is already competitive with the best open-source tools, and 75× faster.** The premium Python SDK adds what none of them can: every figure and chart, extracted losslessly.
 
-| | Free CLI | Python SDK | docling | pymupdf4llm | markitdown | pypdf |
+| | Nutrient CLI | Python SDK | docling | pymupdf4llm | markitdown | pypdf |
 |---|---:|---:|---:|---:|---:|---:|
 | Runtime | **1.19s** | 53s | 89s | 17.7s | 40.9s | 8.1s |
 | Headings | 265 | 265 | 287 | 258 | 0 | 0 |
@@ -20,7 +20,7 @@ The canonical Nutrient CLI output is one level up: [`../anthropic-claude-mythos-
 
 ## The two Nutrient tiers
 
-1. **[Free CLI](..)** — the `pdf-to-markdown` binary in this repo. Heuristic extraction, no ML models, MIT-free for up to 1,000 docs/month. Wins on speed and produces clean markdown tables and headings.
+1. **[Nutrient CLI](..)** — the `pdf-to-markdown` binary in this repo. Standard conversion is free, uses no ML models, and wins on speed while producing clean Markdown tables and headings.
 
 2. **[Python SDK](https://pypi.org/project/nutrient-sdk/)** (`nutrient-sdk` v1.0.4) — the premium engine with OCR, ICR, Vision, and image extraction. Everything the CLI does, plus every figure in the document rendered to an actual image file.
 
@@ -109,7 +109,7 @@ Only **one** parser produced actual figure images: **nutrient SDK**.
 | [`anthropic-claude-mythos-liteparse.md`](anthropic-claude-mythos-liteparse.md) | @llamaindex/liteparse | latest | |
 | [`anthropic-claude-mythos-pypdf.md`](anthropic-claude-mythos-pypdf.md) | pypdf | 6.9.2 | |
 
-The canonical **nutrient CLI** output (what the free `pdf-to-markdown` binary produces) is in the parent directory: [`../anthropic-claude-mythos-system-card.md`](../anthropic-claude-mythos-system-card.md)
+The canonical **nutrient CLI** output (what the `pdf-to-markdown` binary produces) is in the parent directory: [`../anthropic-claude-mythos-system-card.md`](../anthropic-claude-mythos-system-card.md)
 
 ## Reproducing this comparison
 
@@ -117,7 +117,7 @@ The canonical **nutrient CLI** output (what the free `pdf-to-markdown` binary pr
 # Input
 curl -o mythos.pdf https://www-cdn.anthropic.com/53566bf5440a10affd749724787c8913a2ae0841.pdf
 
-# Nutrient free CLI (this repo)
+# Nutrient CLI (this repo)
 npx @pspdfkit/pdf-to-markdown mythos.pdf anthropic-claude-mythos-system-card.md
 
 # Nutrient Python SDK (premium — figures, tables, OCR, ICR, Vision)
@@ -146,8 +146,8 @@ npx markit-ai mythos.pdf -q -o markit.md
 
 1. **Most "PDF to markdown" tools are just PDF-to-text tools wearing a hat.** Half the parsers tested (markitdown, pypdf, markit-ai, liteparse) produced zero markdown structure on a 245-page document. For RAG, these are strictly worse than just piping `pdftotext` output into your prompt.
 
-2. **The free CLI in this repo is not a toy.** It matches docling and pymupdf4llm on structural extraction and beats both on speed by 15–75×. For 99% of agent workflows, it's all you need — and it's free.
+2. **The CLI in this repo is not a toy.** It matches docling and pymupdf4llm on structural extraction and beats both on speed by 15–75×. For most agent workflows, it is all you need.
 
-3. **Figures are the thing every free tool misses.** Even the top three (nutrient CLI, docling, pymupdf4llm) all produced zero actual images on this document. If your pipeline needs the charts — benchmark results, architecture diagrams, training loss curves — the free tier won't get you there.
+3. **Figures are the thing every basic extractor misses.** Even the top three (nutrient CLI, docling, pymupdf4llm) all produced zero actual images on this document. If your pipeline needs the charts — benchmark results, architecture diagrams, training loss curves — use a vision-capable workflow.
 
 4. **The premium SDK closes the figure gap cleanly.** 110/110 figures from the Mythos PDF extracted as real image files, in place, adjacent to their captions. That's what "figures, tables, and all" actually looks like.
