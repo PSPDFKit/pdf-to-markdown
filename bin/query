@@ -48,8 +48,6 @@ ARCHIVE_TMP=""
 CHECKSUM_TMP=""
 EXTRACT_TMP=""
 NEXT_INSTALL_DIR=""
-OLD_INSTALL_DIR=""
-INSTALL_MOVED_ASIDE=0
 STATE_TMP=""
 VERB_LINK_TMP=""
 
@@ -68,14 +66,6 @@ release_install_lock_or_exit() {
 }
 
 cleanup_install_artifacts() {
-  if [ "$INSTALL_MOVED_ASIDE" -eq 1 ] && [ -n "$OLD_INSTALL_DIR" ]; then
-    if [ ! -e "$INSTALL_DIR" ] && [ ! -L "$INSTALL_DIR" ]; then
-      mv "$OLD_INSTALL_DIR" "$INSTALL_DIR" 2>/dev/null || :
-    else
-      rm -rf "$OLD_INSTALL_DIR" || :
-    fi
-  fi
-
   [ -z "$ARCHIVE_TMP" ] || rm -f "$ARCHIVE_TMP" || :
   [ -z "$CHECKSUM_TMP" ] || rm -f "$CHECKSUM_TMP" || :
   [ -z "$EXTRACT_TMP" ] || rm -rf "$EXTRACT_TMP" || :
@@ -85,8 +75,6 @@ cleanup_install_artifacts() {
   CHECKSUM_TMP=""
   EXTRACT_TMP=""
   NEXT_INSTALL_DIR=""
-  OLD_INSTALL_DIR=""
-  INSTALL_MOVED_ASIDE=0
 }
 
 cleanup_on_exit() {
@@ -313,9 +301,7 @@ install_archive() {
     cleanup_install_artifacts
     return 1
   }
-  NEXT_INSTALL_DIR="${INSTALL_DIR}.new.$$"
-  OLD_INSTALL_DIR="${INSTALL_DIR}.old.$$"
-  INSTALL_MOVED_ASIDE=0
+  NEXT_INSTALL_DIR="${INSTALL_DIR}/.new.$$"
 
   download_to_file "$archive_url" "$ARCHIVE_TMP" 300 || {
     cleanup_install_artifacts
@@ -345,6 +331,10 @@ install_archive() {
     cleanup_install_artifacts
     return 1
   }
+  if ! mkdir -p "$INSTALL_DIR" || ! chmod go-w "$INSTALL_DIR"; then
+    cleanup_install_artifacts
+    return 1
+  fi
   rm -rf "$NEXT_INSTALL_DIR" || {
     cleanup_install_artifacts
     return 1
@@ -377,34 +367,13 @@ install_archive() {
     esac
   fi
 
-  if [ -e "$INSTALL_DIR" ] || [ -L "$INSTALL_DIR" ]; then
-    mv "$INSTALL_DIR" "$OLD_INSTALL_DIR" || {
-      cleanup_install_artifacts
-      return 1
-    }
-    INSTALL_MOVED_ASIDE=1
-  fi
-
-  if ! mv "$NEXT_INSTALL_DIR" "$INSTALL_DIR"; then
-    if [ "$INSTALL_MOVED_ASIDE" -eq 1 ]; then
-      mv "$OLD_INSTALL_DIR" "$INSTALL_DIR" 2>/dev/null || :
-      if [ -e "$INSTALL_DIR" ] || [ -L "$INSTALL_DIR" ]; then
-        INSTALL_MOVED_ASIDE=0
-      fi
-    fi
+  # The archive contains only this binary. Replace it with one same-filesystem
+  # rename, leaving the directory and command links available to cached callers.
+  # Readers can execute either complete version; there is no missing-file window.
+  mv -f "$NEXT_INSTALL_DIR/$BINARY_NAME" "$NUTRIENT_CLI" || {
     cleanup_install_artifacts
     return 1
-  fi
-  NEXT_INSTALL_DIR=""
-
-  if [ "$INSTALL_MOVED_ASIDE" -eq 1 ]; then
-    rm -rf "$OLD_INSTALL_DIR" || {
-      cleanup_install_artifacts
-      return 1
-    }
-  fi
-  OLD_INSTALL_DIR=""
-  INSTALL_MOVED_ASIDE=0
+  }
 
   cleanup_install_artifacts
 }
@@ -441,6 +410,12 @@ acquire_install_lock() {
       fi
     fi
 
+    # Only a first install needs to wait for the updater. A cached command can
+    # run safely while the replacement is downloaded and atomically installed.
+    if have_installed_binary; then
+      return 1
+    fi
+
     lock_attempts=$((lock_attempts + 1))
     if [ "$lock_attempts" -ge 60 ]; then
       return 1
@@ -475,6 +450,9 @@ refresh_if_needed() {
   }
 
   if ! acquire_install_lock; then
+    if have_installed_binary; then
+      return 0
+    fi
     echo "Timed out waiting for install lock: $INSTALL_LOCK_PATH" >&2
     exit 1
   fi
@@ -499,8 +477,8 @@ refresh_if_needed() {
     }
   fi
 
-  # Account commands require a current binary, so their launcher always checks
-  # the release channel before deciding whether the cached binary is usable.
+  # Account commands check the release channel whenever no updater is active.
+  # The dispatch guard below also rejects an incompatible cached binary.
   if [ "$FORCE_FRESHNESS_CHECK" -eq 1 ]; then
     LAST_CHECKED_AT=""
   fi
@@ -604,10 +582,21 @@ verb_link_is_valid() {
 
   case "$(uname -s)" in
     MINGW*|MSYS*|CYGWIN*)
-      # shellcheck disable=SC3013 # this branch only runs under Git Bash/Cygwin, where sh is bash and supports -nt
+      # Git Bash can emulate symlinks with copies. Compare their contents:
+      # a replacement binary can have an older timestamp than an existing copy.
       [ -z "$verb_link_target" ] &&
-        [ ! "$NUTRIENT_CLI" -nt "$VERB_LINK" ]
+        cmp -s "$NUTRIENT_CLI" "$VERB_LINK"
       ;;
+    *) return 1 ;;
+  esac
+}
+
+cached_verb_link_is_usable() {
+  verb_link_is_valid && return 0
+  case "$(uname -s)" in
+    # Windows may refuse to replace a running command copy. It remains usable
+    # until it exits; a subsequent invocation will update it.
+    MINGW*|MSYS*|CYGWIN*) [ -f "$VERB_LINK" ] && [ ! -L "$VERB_LINK" ] && [ -x "$VERB_LINK" ] ;;
     *) return 1 ;;
   esac
 }
@@ -618,14 +607,14 @@ if ! verb_link_is_valid; then
   if ! ln -s "$BINARY_NAME" "$VERB_LINK_TMP"; then
     rm -f "$VERB_LINK_TMP" || :
     VERB_LINK_TMP=""
-    if ! verb_link_is_valid; then
+    if ! cached_verb_link_is_usable; then
       echo "Failed to create command link: $VERB_LINK" >&2
       exit 1
     fi
   elif ! mv -f "$VERB_LINK_TMP" "$VERB_LINK"; then
     rm -f "$VERB_LINK_TMP" || :
     VERB_LINK_TMP=""
-    if ! verb_link_is_valid; then
+    if ! cached_verb_link_is_usable; then
       echo "Failed to install command link: $VERB_LINK" >&2
       exit 1
     fi

@@ -32,6 +32,9 @@ jobs:
       - name: Check shell syntax
         run: npm run check
 
+      - name: Test cached commands during updates
+        run: npm test
+
       - name: Reject an old cached binary for account commands
         if: runner.os == 'Linux'
         run: |
