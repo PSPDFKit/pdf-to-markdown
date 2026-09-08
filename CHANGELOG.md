@@ -2,9 +2,11 @@
 
 ## 0.6.0 — 2026-09-04
 
+- Revised the license for unlimited free Standard conversion and `query`, permitted noncompetitive SaaS integrations, and separately licensed OEM distribution.
+- Required paid DWS-key authorization for CLI Vision and other premium functionality. Free premium evaluation is DWS-only and excludes organizations above USD 1 million in annual gross revenue or 20 employees.
+- Added versioned acceptance, existing-agreement treatment, privacy limits, and complete commercial risk-allocation terms. Native/DWS enforcement and matching release artifacts remain prerequisites; see [licensing release review](docs/licensing-release-review.md).
 - Added the `nutrient` entry point and `nutrient auth login`, `status`, and `logout` workflows.
-- Added Nutrient sign-in, Vision access through account plans or API keys, offline Vision support, and usage reporting to both conversion commands.
-- Kept Standard conversion free and existing Nutrient CLI license-key workflows backward compatible.
+- Added account and API-key integration, offline entitlement handling, and usage reporting to both conversion commands; technical credential support does not expand the revised license grant.
 - Fixed release-download verification on macOS and Linux. Cached commands keep working while the CLI updates.
 
 ## 0.5.1 — 2026-07-23

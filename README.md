@@ -12,13 +12,15 @@
 
 Convert PDFs to clean Markdown locally. The CLI works with Claude, Codex, RAG pipelines, and other document-processing workflows.
 
+> Release preparation: this branch contains revised license terms for the next release. Native CLI and DWS entitlement enforcement, license acceptance, and privacy disclosures still require implementation or alignment and verification before publication. The terms below do not establish that an older downloaded binary implements this policy. Release dependencies are tracked in [PR #20](https://github.com/PSPDFKit/pdf-to-markdown/pull/20).
+
 - **How fast is it?** — 0.004s per page. 134x faster than docling, 53x faster than pymupdf4llm. ([benchmarks](#benchmarks))
 - **How accurate is it?** — In our benchmark, Nutrient Standard scored 0.93 for reading order, 0.89 overall, and 0.82 for heading detection. ([benchmarks](#benchmarks))
-- **Vision (`--vision`)** — Vision handles scanned and handwritten documents and has the highest score in every accuracy measure shown, including tables (0.94 TEDS). It runs locally at 0.35 seconds per page. Use a Nutrient account, API key, or Nutrient CLI license key. ([benchmarks](#benchmarks))
+- **Vision (`--vision`)** — Vision handles scanned and handwritten documents and has the highest score in every accuracy measure shown, including tables (0.94 TEDS). It runs locally at 0.35 seconds per page. CLI use requires a DWS-issued license key with a paid entitlement for CLI Vision. ([benchmarks](#benchmarks))
 - **Three document tools, one binary** — `pdf-to-markdown` creates structured Markdown, `pdf-to-text` creates layout-preserving text, and `query` searches an extracted file. ([the Nutrient CLI](#the-nutrient-cli))
 - **Image export** — `--enable-image-export` saves images alongside the Markdown output. ([usage](#image-export))
 - **Where do my PDFs go?** — Nowhere. The CLI runs locally. Your documents are not uploaded to Nutrient. ([trust & licensing](#trust-and-licensing))
-- **What does it cost?** — Standard conversion is free. Vision uses one page from your monthly allowance for each input page. ([Standard and Vision](#standard-and-vision))
+- **What does it cost?** — Standard conversion and `query` are free and unlimited for permitted uses. CLI Vision requires paid DWS access; free premium evaluation is available only through an eligible DWS offering. ([Standard and Vision](#standard-and-vision))
 
 ## The Nutrient CLI
 
@@ -118,7 +120,11 @@ directly for document work.
 
 ## Accounts and automation
 
-Standard conversion is free and doesn’t require an account. Sign in to use Vision with your Nutrient plan:
+Standard conversion and `query` are free and unlimited for permitted uses, including containers, continuous integration (CI), and noncompetitive SaaS integrations. They do not require an account or key, regardless of company size.
+
+CLI Vision and other premium functionality require a DWS-issued license key with a paid entitlement expressly covering the requested CLI functionality. A free DWS evaluation allowance cannot be used in the CLI. Account sign-in alone and standalone SDK or offline keys do not grant CLI premium access under this license.
+
+The package provides account-management commands:
 
 ```bash
 nutrient auth login
@@ -126,13 +132,13 @@ nutrient auth login
 
 The CLI opens a Nutrient page in your browser. Approve the request, then return to the terminal.
 
-Check your plan, remaining Vision pages, and locally pending usage at any time:
+Check account status and locally pending usage:
 
 ```bash
 nutrient auth status
 ```
 
-Standard also works without an account in containers and continuous integration (CI). To use Vision there, create an API key in the [PDF-to-Markdown dashboard](https://dashboard.nutrient.io/nutrient-cli/api_keys/) and keep it in the environment:
+For the DWS API-key integration, obtain a key in the [PDF-to-Markdown dashboard](https://dashboard.nutrient.io/nutrient-cli/api_keys/) for a paid plan that authorizes CLI Vision, and keep it in the environment. Creating a key does not itself purchase or authorize a feature:
 
 ```bash
 export NUTRIENT_API_KEY="pdf_live_..."
@@ -141,7 +147,7 @@ pdf-to-markdown --vision input.pdf output.md
 
 Both conversion commands also accept `--api-key KEY`, but environment variables are safer because command arguments can appear in shell history and process listings.
 
-The CLI uses a Nutrient CLI license key first, then an API key, and then your saved Nutrient sign-in. Without any of these, Standard still works and Vision asks you to sign in. An invalid key or expired sign-in is reported as an error; the CLI doesn’t quietly switch to another account.
+Keep the key within the organization operating the integration; SaaS users do not need a copy of the operator's key. Under the revised license, missing or invalid credentials do not remove the right to use Standard conversion or `query`. The native release must preserve that operation while rejecting unauthorized premium requests. Separately negotiated agreements retain their own terms; possession of an old key does not by itself establish those rights.
 
 ## Usage
 
@@ -202,6 +208,8 @@ Each result includes a `Lines A–B` range, so you can read that exact part of t
 ### Updates
 
 The wrapper keeps the downloaded binary current. It checks for a newer release at most once every six hours and updates in place. No manual update is required.
+
+Downloading an update does not by itself establish acceptance of changed license terms. Earlier copies and separately negotiated agreements are addressed in [LICENSE.md](LICENSE.md); the release must implement the applicable notice and acceptance process before distributing a material licensing change through automatic updates.
 
 ## Platform Support
 
@@ -277,28 +285,33 @@ Nutrient and LiteParse ran in parallel batches; the other tools processed docume
 
 † The `--vision` flag improves extraction for scans, handwriting, formulas, and complex layouts. With `--provider auto`, it uses GPU acceleration when available and otherwise uses the CPU. In this benchmark, Nutrient Vision 1.3.1 has the highest score in every accuracy measure and runs faster than Docling.
 
-The first Vision run downloads several hundred MB of models and caches them locally. Each input page uses one Vision page from your monthly allowance. Failed conversions don’t use Vision pages. Sign in with `nutrient auth login`, use `NUTRIENT_API_KEY` in automation, or pass a Nutrient CLI license key with `--license-key`.
+The first Vision run downloads several hundred MB of models and caches them locally. CLI Vision requires a DWS-issued license key with the applicable paid CLI entitlement; the API-key integration accepts `NUTRIENT_API_KEY`. The historical benchmark results above do not grant trial or legacy-key access under the revised license.
+
+For page-based CLI Vision plans, a successfully converted input document consumes one Vision page for each input page. Failed document conversions do not consume Vision pages; successful documents in a partially failed batch remain chargeable. A successful conversion followed by a usage-reporting failure is different from a failed conversion: reconcile the saved usage record before rerunning a completed job. See [LICENSE.md](LICENSE.md) and the selected plan for the applicable metering rules.
 
 ## Standard and Vision
 
-Standard conversion and `query` are free and don’t use Vision pages. The CLI tries to report Standard usage, but a connection problem doesn’t stop the conversion.
+Standard conversion and `query` are free and unlimited for permitted uses. They do not use Vision pages and have no revenue or employee threshold. Account authentication and usage reporting must not block Standard or `query` under this license.
 
-Vision improves results for scanned pages, handwriting, formulas, and complex tables. It requires a Nutrient account, an API key, or a Nutrient CLI license key. See the [live pricing page](https://www.nutrient.io/api/pricing/pdf-to-markdown/) for current allowances and prices.
+Vision improves results for scanned pages, handwriting, formulas, and complex tables. Vision and additional premium functionality require DWS authorization; CLI premium use requires a paid entitlement and a DWS-issued license key. Review the applicable plan and prices in the [DWS dashboard](https://dashboard.nutrient.io/) before purchase.
 
-Standard conversion can continue when Nutrient is unavailable. After Vision connects, it can work offline for one hour and process up to 100 pages before it must reconnect. A document that crosses the 100-page threshold can finish. Nutrient CLI license-key workflows continue to work offline.
+Free premium evaluation is available only through a DWS offering that expressly provides it, never through the CLI. Organizations with more than USD 1 million in annual gross revenue **or** more than 20 employees are ineligible for free premium access, including evaluation, development, and testing. Organizations of any size may purchase authorized premium access. The same account's free DWS allowance cannot unlock CLI Vision.
+
+Any permitted offline premium use must remain within the paid DWS entitlement and its reconnection requirements. A standalone SDK or offline key is not a substitute under this license. Existing negotiated rights require separate transition review.
 
 For the full comparison table, see [docs/benchmarks.md](docs/benchmarks.md).
 
 ## Trust and Licensing
 
-- Standard conversion and `query` are free and don’t require a Nutrient account
-- Vision uses one page from the monthly allowance for each input page; failed conversions don’t use Vision pages
+- Standard conversion and `query` are free and unlimited for permitted uses, with no account, revenue, or employee restriction
+- CLI Vision and higher premium functionality require a DWS-issued license key with a paid CLI entitlement; no free CLI evaluation
+- Free premium evaluation is offered only through eligible DWS offerings, subject to the revenue and employee limits above
 - PDFs stay local — your documents are not uploaded to Nutrient by this extractor
-- The CLI reports a random event ID, command, Standard or Vision mode, input page count, time, CLI version, and the identifier needed to associate usage with an account or installation
-- The CLI creates a one-way installation identifier from system details. It doesn’t send the details used to create that identifier.
-- Existing Nutrient CLI license keys keep their existing terms
+- DWS usage reports include an event ID, command, mode, input page count, time, CLI version, and an account or installation identifier; SDK diagnostic and analytics reporting must also be covered by the release's privacy disclosure
+- Hashed installation identifiers may still be personal data; hashing does not establish anonymity. See [Nutrient's Privacy Policy](https://www.nutrient.io/legal/privacy/) and the license's product-specific limits
+- Earlier software copies and separately negotiated agreements retain the treatment specified in their applicable terms; they are not silently replaced by an update
 - The extraction engine is delivered as a signed platform binary; the repo contains only the wrapper and documentation
-- The license is non-transferable. Redistribution, OEM, embedded, and white-label use require a separate agreement with Nutrient.
+- Noncompetitive hosted, SaaS, and internal integrations are permitted. OEM supply of the engine in customer-operated products requires a separate agreement. Branding a hosted SaaS application under your own name does not itself make it OEM use
 
 See [LICENSE.md](LICENSE.md) for the full terms.
 
@@ -314,11 +327,15 @@ Standard works with PDFs that already contain a text layer; it does not perform 
 
 ### Do my documents leave my machine?
 
-No. Your files stay on your machine. Usage reports include the conversion mode and input page count, but not file names, paths, document contents, or output. The CLI also creates a one-way installation identifier from system details without sending those details. If you feed the extracted Markdown into Claude, Codex, or another model provider, their own data policies apply.
+The local extractor does not upload your documents or converted output to Nutrient. DWS usage reports exclude file names, paths, document contents, and output. Account, installation, diagnostic, and analytics data are addressed in the license and Privacy Policy. If you submit files to a hosted DWS evaluation or feed extracted Markdown into Claude, Codex, or another provider, that separate service's data terms apply.
 
 ### Do I need a license key or API token?
 
-No. Standard conversion works without an account, including in containers and CI. Vision requires a Nutrient account, API key, or Nutrient CLI license key.
+Standard conversion and `query` require neither. CLI Vision and other premium functionality require a DWS-issued license key with a paid entitlement covering the requested CLI feature. A free DWS account, evaluation allowance, or account sign-in alone is insufficient.
+
+### Can I integrate the CLI into my SaaS product?
+
+Yes, for noncompetitive uses under [LICENSE.md](LICENSE.md). You may operate the CLI on infrastructure you control and provide functionality to your users. Standard and `query` remain free and unlimited; CLI premium features require your paid DWS entitlement. Supplying the proprietary engine as part of a customer-operated product is OEM use and requires a separate agreement.
 
 ### Why is the extraction engine closed-source?
 
