@@ -6,7 +6,7 @@ Copyright (c) Nutrient.io
 
 This License is between PSPDFKit GmbH, doing business as Nutrient ("Nutrient"), and the individual or legal entity accepting it ("you"). If accepting for an organization, you represent that you have authority to bind it. "Software" means the Nutrient PDF to Markdown command-line software, accompanying proprietary extraction engine, and documentation distributed with this License. Third-party components are addressed in Section 12.
 
-This License takes effect when you validly accept it through an affirmative acceptance process identifying this version and making its terms available beforehand. Downloading an update, receiving a notice, or recording that a notice was displayed does not alone constitute acceptance. If you do not accept, this License grants no rights; earlier licenses and separate agreements are addressed in Section 4.
+By using the Software after this License has been made available to you, you accept its terms. Downloading an update, receiving a notice, or recording that a notice was displayed does not alone constitute acceptance. If you do not accept, this License grants no rights; earlier licenses and separate agreements are addressed in Section 4.
 
 ## 1. License grant and permitted integrations
 
@@ -20,7 +20,7 @@ You may process customer documents and use or distribute resulting output within
 
 Standard conversion and `query` are free, without limits on documents, pages, queries, or processing events, for individuals and organizations of every size. These rights include the integrations permitted by Section 1.
 
-Standard conversion and `query` require no Nutrient account, DWS License Key, subscription, or free-tier eligibility determination. They consume no premium allowances. Missing, invalid, or expired credentials, failed authentication or entitlement checks, exhausted premium allowances, and unavailable usage reporting must not prevent their operation. Standard reporting is best effort and does not block these functions.
+Standard conversion and `query` require no Nutrient account, license key, subscription, or free-tier eligibility determination. They consume no premium allowances. Standard conversion may report an error when an explicitly configured key or saved sign-in cannot be authenticated. Standard reporting is best effort and does not block these functions.
 
 The competitive-use and OEM restrictions remain applicable. Revenue and employee limits for free DWS premium access do not apply to Standard conversion or `query`.
 
@@ -28,17 +28,17 @@ The competitive-use and OEM restrictions remain applicable. Revenue and employee
 
 "Premium Functionality" means Vision and additional functionality expressly identified as premium in the applicable product description or order. Standard conversion and `query` are not Premium Functionality under this License.
 
-Premium Functionality requires a valid license key issued through Nutrient Document Web Services (a "DWS License Key") and an entitlement expressly authorizing the requested functionality and channel. Key validity alone does not establish an entitlement or available allowance.
+Premium Functionality requires authorization for the requested functionality and channel. CLI Vision supports Nutrient account sign-in, API keys, and Nutrient CLI license keys. Signing in or possessing a credential alone does not establish the required authorization or available allowance.
 
-Premium Functionality through the CLI requires a paid DWS entitlement expressly authorizing CLI use. No free, promotional, guest, or evaluation allowance authorizes CLI Premium Functionality. Signing in, possessing an API credential without the required entitlement, or possessing a legacy SDK or offline key does not alone satisfy this requirement. Separately signed agreements are addressed in Section 4.
+Account-based CLI Vision is available through free and paid Nutrient Document Web Services (DWS) plans that include Vision, subject to their allowances and eligibility conditions. Account sign-in and API keys use the same account entitlement and allowance.
 
-Free evaluation of Vision or other Premium Functionality is available only through a hosted DWS offering expressly providing it, subject to its allowances and eligibility conditions. It is unavailable through the CLI, including when the same DWS account or key is used in both channels.
+Existing Nutrient CLI license keys continue to authorize use under their applicable agreements, including any permitted offline use. Separately signed agreements are addressed in Section 4.
 
 An organization with more than twenty (20) employees OR more than one million United States dollars (USD 1,000,000) in annual gross revenue is ineligible for free DWS premium access and must purchase access, including for development, testing, and evaluation. An organization at or below both thresholds remains subject to the offering's other eligibility conditions. Paid access is available to organizations of any size under applicable entitlements.
 
 Your accepted DWS plan or order specifies prices, allowances, billing periods, and payment obligations. Unless it expressly specifies another metering method, each input page of a document successfully converted using Vision consumes one Vision page. An engine conversion that fails does not consume Vision pages. Failure to report or settle usage after successful conversion is not an engine failure. Reconciliation or retransmission of the same usage event must not create an additional charge. A new conversion of the same document is a separate processing event and may consume pages; a nonzero command exit alone does not establish whether conversion succeeded. Conversion and settlement status must be distinguishable in reported results or account usage records.
 
-Premium access may require connectivity to verify entitlements and settle usage. Exceeding an allowance does not authorize overage charges or an automatic upgrade unless your accepted plan or order expressly permits them. Premium limitations do not limit Section 2 rights. For permitted SaaS integrations, the operating organization's entitlement governs; it does not authorize sharing its DWS License Key with end users.
+Premium access may require connectivity to verify entitlements and settle usage. Exceeding an allowance does not authorize overage charges or an automatic upgrade unless your accepted plan or order expressly permits them. Premium limitations do not limit Section 2 rights. For permitted SaaS integrations, the operating organization's entitlement governs; it does not authorize sharing its account credentials or license keys with end users.
 
 ## 4. Applicable terms, earlier versions, and migration
 
@@ -60,7 +60,7 @@ Installation instructions directing a user to obtain the Software from Nutrient 
 
 You may not use the Software or its functionality to develop, operate, or provide a product or service that competes with Nutrient's commercial offerings. This restriction concerns using the Software to supply competing functionality. Operating in an adjacent market or integrating the Software into an application does not alone establish competition. Independent development that does not use the Software is not prohibited.
 
-You may not circumvent licensing controls or premium limits; use multiple accounts or false eligibility information to obtain unauthorized free premium access; disclose a DWS License Key to unauthorized parties; remove copyright, trademark, or proprietary notices; or use the Software unlawfully. Exercising unlimited Standard or `query` rights is not circumvention. These restrictions do not limit rights that applicable law or a third-party component's license prevents Nutrient from restricting.
+You may not circumvent licensing controls or premium limits; use multiple accounts or false eligibility information to obtain unauthorized free premium access; disclose account credentials or license keys to unauthorized parties; remove copyright, trademark, or proprietary notices; or use the Software unlawfully. Exercising unlimited Standard or `query` rights is not circumvention. These restrictions do not limit rights that applicable law or a third-party component's license prevents Nutrient from restricting.
 
 ## 7. Local processing, usage information, and privacy
 
