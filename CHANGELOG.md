@@ -8,6 +8,7 @@
 - Added the `nutrient` entry point and `nutrient auth login`, `status`, and `logout` workflows.
 - Added account and API-key integration, offline entitlement handling, and usage reporting to both conversion commands.
 - Fixed release-download verification on macOS and Linux. Cached commands keep working while the CLI updates.
+- When the CLI can't start, the wrapper now shows its actual error instead of asking for an update. On Linux hosts without the ICU libraries, it also names the package to install, at install time and on account commands.
 
 ## 0.5.1 — 2026-07-23
 

@@ -19,10 +19,19 @@ function executable(file, content) {
   fs.writeFileSync(file, content, { mode: 0o755 });
 }
 
-function binary(version, auth = true) {
+// Mirrors how a .NET binary aborts on a host without ICU: --version still works,
+// but the first command that starts the runtime dies with SIGABRT (status 134).
+const icuCrash = `if [ "\${1-} \${2-}" = 'auth --help' ]; then
+  echo "Process terminated. Couldn't find a valid ICU package installed on the system." >&2
+  echo '   at nutrient-linux-amd64!<BaseAddress>+0x71cb1dc' >&2
+  exit 134
+fi
+`;
+
+function binary(version, auth = true, crash = false) {
   return `#!/bin/sh
 if [ "\${1-}" = --version ]; then echo 'nutrient ${version}'; exit 0; fi
-if [ "\${1-} \${2-}" = 'auth --help' ]; then
+${crash ? icuCrash : ''}if [ "\${1-} \${2-}" = 'auth --help' ]; then
   echo '${auth ? 'nutrient auth login; nutrient auth status; nutrient auth logout' : 'old CLI'}'
   exit 0
 fi
@@ -31,7 +40,7 @@ printf '<%s>\\n' "$@"
 `;
 }
 
-function fixture(t, { cached = true, windows = false, auth = true } = {}) {
+function fixture(t, { cached = true, windows = false, auth = true, crash = false, newCrash = false } = {}) {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'nutrient-wrapper-test-'));
   const home = path.join(temp, 'home');
   const state = path.join(home, '.local/share/nutrient');
@@ -41,9 +50,9 @@ function fixture(t, { cached = true, windows = false, auth = true } = {}) {
   const name = windows ? 'nutrient-windows-amd64.exe' : 'nutrient-linux-amd64';
   const installed = path.join(cache, name);
   for (const dir of [cache, fakeBin, payload]) fs.mkdirSync(dir, { recursive: true });
-  if (cached) executable(installed, binary('old', auth));
+  if (cached) executable(installed, binary('old', auth, crash));
   fs.writeFileSync(path.join(state, 'pdf-to-markdown-state'), 'LAST_CHECKED_AT=1\nRELEASE_ID=2026-09-01\n');
-  executable(path.join(payload, name), binary('new'));
+  executable(path.join(payload, name), binary('new', true, newCrash));
   const archive = path.join(temp, 'release.tar.gz');
   execFileSync('tar', ['-czf', archive, '-C', payload, name]);
   fs.writeFileSync(`${archive}.sha256`, createHash('sha256').update(fs.readFileSync(archive)).digest('hex'));
@@ -202,6 +211,30 @@ test('account commands still reject an incompatible cache while an updater holds
   assert.match(result.stderr, /does not support account commands/);
   assert.equal(result.stdout, '');
   assertDispatch(await f.run('pdf-to-markdown', ['standard.pdf']), 'pdf-to-markdown', ['standard.pdf'], 'old');
+});
+
+test('account commands report a CLI that cannot start instead of asking for an update', async t => {
+  const f = fixture(t, { crash: true });
+  f.mark('offline');
+  const result = await f.run('nutrient', ['auth', 'status']);
+  assert.equal(result.code, 134);
+  assert.equal(result.stdout, '');
+  assert.match(result.stderr, /could not start \(exit status 134\)/);
+  assert.match(result.stderr, /Couldn't find a valid ICU package/);
+  assert.match(result.stderr, /apt-get install libicu-dev/);
+  assert.doesNotMatch(result.stderr, /<BaseAddress>/);
+  assert.doesNotMatch(result.stderr, /does not support account commands/);
+});
+
+test('a Linux install warns once when the new binary cannot start its runtime', async t => {
+  const f = fixture(t, { cached: false, newCrash: true });
+  const installing = await f.run('pdf-to-markdown', ['first.pdf']);
+  assertDispatch(installing, 'pdf-to-markdown', ['first.pdf'], 'new');
+  assert.match(installing.stderr, /could not start \(exit status 134\)/);
+  assert.match(installing.stderr, /apt-get install libicu-dev/);
+  const cached = await f.run('pdf-to-text', ['second.pdf']);
+  assertDispatch(cached, 'pdf-to-text', ['second.pdf'], 'new');
+  assert.doesNotMatch(cached.stderr, /could not start/);
 });
 
 test('Windows command copies update even when a replacement has an older timestamp', async t => {

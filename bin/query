@@ -128,6 +128,26 @@ write_state() {
   STATE_TMP=""
 }
 
+# Reports a binary that terminated before running a command (exit status 126 or
+# higher, which includes death by signal). Shows the binary's own first error
+# lines without managed stack frames, plus an install hint for missing ICU.
+print_cli_start_failure() {
+  failure_status="$1"
+  failure_output="$2"
+
+  echo "The Nutrient CLI could not start (exit status $failure_status):" >&2
+  printf '%s\n' "$failure_output" |
+    sed -e '/^[[:space:]]*at /d' -e '/^[[:space:]]*$/d' \
+      -e '/^Aborted\( (core dumped)\)\{0,1\}$/d' -e '/^Killed$/d' \
+      -e '/^Segmentation fault\( (core dumped)\)\{0,1\}$/d' |
+    head -n 3 >&2
+  case "$failure_output" in
+    *ICU*|*libicu*)
+      echo "Install the ICU libraries, then retry. Debian or Ubuntu: apt-get install libicu-dev. Alpine: apk add icu-libs. Fedora or RHEL: dnf install libicu." >&2
+      ;;
+  esac
+}
+
 have_installed_binary() {
   [ -x "$NUTRIENT_CLI" ]
 }
@@ -366,6 +386,21 @@ install_archive() {
         ;;
     esac
   fi
+
+  # --version does not start the .NET runtime. On Linux, probe a command that
+  # does, so a host missing a runtime dependency (for example the ICU libraries)
+  # is reported once at install time instead of as an unexplained crash later.
+  # The install still completes: --version, --help, and --license keep working.
+  case "$TARGET_ID" in
+    linux-*)
+      probe_status=0
+      probe_output="$({ "$NEXT_INSTALL_DIR/$(basename "$NUTRIENT_CLI")" auth --help; } 2>&1)" ||
+        probe_status=$?
+      if [ "$probe_status" -ge 126 ]; then
+        print_cli_start_failure "$probe_status" "$probe_output"
+      fi
+      ;;
+  esac
 
   # The archive contains only this binary. Replace it with one same-filesystem
   # rename, leaving the directory and command links available to cached callers.
