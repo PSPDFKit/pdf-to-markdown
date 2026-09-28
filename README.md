@@ -219,6 +219,8 @@ Downloading an update does not by itself establish acceptance of changed license
 
 macOS Intel and Rosetta shells are unsupported; npm may allow installation, but the commands refuse to run.
 
+Linux also needs the ICU libraries. Most desktop distributions include them, but slim container images often don't. Install them with `apt-get install libicu-dev` on Debian or Ubuntu, `apk add icu-libs` on Alpine, or `dnf install libicu` on Fedora or RHEL.
+
 Windows binaries are Authenticode-signed and run under Git Bash (`MINGW`/`MSYS`/`Cygwin` environments), bundled with Git for Windows. An x64 Git Bash on Windows-on-ARM detects as x86_64 and fetches the x64 binary, which runs fine under Windows emulation.
 
 ## Benchmarks

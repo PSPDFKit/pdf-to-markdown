@@ -137,6 +137,26 @@ write_state() {
   STATE_TMP=""
 }
 
+# Reports a binary that terminated before running a command (exit status 126 or
+# higher, which includes death by signal). Shows the binary's own first error
+# lines without managed stack frames, plus an install hint for missing ICU.
+print_cli_start_failure() {
+  failure_status="$1"
+  failure_output="$2"
+
+  echo "The Nutrient CLI could not start (exit status $failure_status):" >&2
+  printf '%s\n' "$failure_output" |
+    sed -e '/^[[:space:]]*at /d' -e '/^[[:space:]]*$/d' \
+      -e '/^Aborted\( (core dumped)\)\{0,1\}$/d' -e '/^Killed$/d' \
+      -e '/^Segmentation fault\( (core dumped)\)\{0,1\}$/d' |
+    head -n 3 >&2
+  case "$failure_output" in
+    *ICU*|*libicu*)
+      echo "Install the ICU libraries, then retry. Debian or Ubuntu: apt-get install libicu-dev. Alpine: apk add icu-libs. Fedora or RHEL: dnf install libicu." >&2
+      ;;
+  esac
+}
+
 have_installed_binary() {
   [ -x "$NUTRIENT_CLI" ]
 }
@@ -375,6 +395,21 @@ install_archive() {
         ;;
     esac
   fi
+
+  # --version does not start the .NET runtime. On Linux, probe a command that
+  # does, so a host missing a runtime dependency (for example the ICU libraries)
+  # is reported once at install time instead of as an unexplained crash later.
+  # The install still completes: --version, --help, and --license keep working.
+  case "$TARGET_ID" in
+    linux-*)
+      probe_status=0
+      probe_output="$({ "$NEXT_INSTALL_DIR/$(basename "$NUTRIENT_CLI")" auth --help; } 2>&1)" ||
+        probe_status=$?
+      if [ "$probe_status" -ge 126 ]; then
+        print_cli_start_failure "$probe_status" "$probe_output"
+      fi
+      ;;
+  esac
 
   # The archive contains only this binary. Replace it with one same-filesystem
   # rename, leaving the directory and command links available to cached callers.
@@ -628,17 +663,38 @@ if ! verb_link_is_valid; then
   fi
 fi
 
+# Returns 0 when the installed binary provides account commands, 1 when it runs
+# but predates them, and 2 when it cannot start at all.
 supports_nutrient_auth() {
-  auth_help="$("$VERB_LINK" auth --help 2>/dev/null)" || return 1
-  case "$auth_help" in
+  AUTH_PROBE_STATUS=0
+  AUTH_PROBE_OUTPUT="$({ "$VERB_LINK" auth --help; } 2>&1)" || AUTH_PROBE_STATUS=$?
+  if [ "$AUTH_PROBE_STATUS" -ge 126 ]; then
+    case "$TARGET_ID/$AUTH_PROBE_STATUS" in
+      windows-*/126|windows-*/127) return 1 ;;
+      *) return 2 ;;
+    esac
+  fi
+  [ "$AUTH_PROBE_STATUS" -eq 0 ] || return 1
+  case "$AUTH_PROBE_OUTPUT" in
     *" auth login"*" auth status"*" auth logout"*) return 0 ;;
     *) return 1 ;;
   esac
 }
 
-if [ "$VERB_NAME" = "nutrient" ] && ! supports_nutrient_auth; then
-  echo "The installed Nutrient CLI does not support account commands. Connect to the internet and retry so it can be updated." >&2
-  exit 1
+if [ "$VERB_NAME" = "nutrient" ]; then
+  auth_support=0
+  supports_nutrient_auth || auth_support=$?
+  case "$auth_support" in
+    0) ;;
+    2)
+      print_cli_start_failure "$AUTH_PROBE_STATUS" "$AUTH_PROBE_OUTPUT"
+      exit "$AUTH_PROBE_STATUS"
+      ;;
+    *)
+      echo "The installed Nutrient CLI does not support account commands. Connect to the internet and retry so it can be updated." >&2
+      exit 1
+      ;;
+  esac
 fi
 
 exec "$VERB_LINK" "$@"
