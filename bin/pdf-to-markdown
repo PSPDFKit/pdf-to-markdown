@@ -8,6 +8,18 @@ CHECK_INTERVAL_SECONDS=21600
 LATEST_URL="https://agent-cdn.nutrient.io/pdf-to-markdown/LATEST"
 CDN_PREFIX="https://agent-cdn.nutrient.io/pdf-to-markdown"
 
+FORCE_FRESHNESS_CHECK=0
+VERB_NAME="${NUTRIENT_WRAPPER_VERB:-pdf-to-markdown}"
+case "$VERB_NAME" in
+  nutrient) FORCE_FRESHNESS_CHECK=1 ;;
+  pdf-to-markdown) ;;
+  *)
+    echo "Unsupported wrapper command: $VERB_NAME" >&2
+    exit 1
+    ;;
+esac
+
+# BEGIN SHARED INSTALL WRAPPER
 case "$(uname -s)/$(uname -m)" in
   Linux/aarch64)
     TARGET_ID="linux-arm64"
@@ -45,8 +57,6 @@ ARCHIVE_TMP=""
 CHECKSUM_TMP=""
 EXTRACT_TMP=""
 NEXT_INSTALL_DIR=""
-OLD_INSTALL_DIR=""
-INSTALL_MOVED_ASIDE=0
 STATE_TMP=""
 VERB_LINK_TMP=""
 
@@ -57,15 +67,14 @@ release_install_lock() {
   fi
 }
 
-cleanup_install_artifacts() {
-  if [ "$INSTALL_MOVED_ASIDE" -eq 1 ] && [ -n "$OLD_INSTALL_DIR" ]; then
-    if [ ! -e "$INSTALL_DIR" ] && [ ! -L "$INSTALL_DIR" ]; then
-      mv "$OLD_INSTALL_DIR" "$INSTALL_DIR" 2>/dev/null || :
-    else
-      rm -rf "$OLD_INSTALL_DIR" || :
-    fi
+release_install_lock_or_exit() {
+  if ! release_install_lock; then
+    echo "Failed to release install lock: $INSTALL_LOCK_PATH" >&2
+    exit 1
   fi
+}
 
+cleanup_install_artifacts() {
   [ -z "$ARCHIVE_TMP" ] || rm -f "$ARCHIVE_TMP" || :
   [ -z "$CHECKSUM_TMP" ] || rm -f "$CHECKSUM_TMP" || :
   [ -z "$EXTRACT_TMP" ] || rm -rf "$EXTRACT_TMP" || :
@@ -75,8 +84,6 @@ cleanup_install_artifacts() {
   CHECKSUM_TMP=""
   EXTRACT_TMP=""
   NEXT_INSTALL_DIR=""
-  OLD_INSTALL_DIR=""
-  INSTALL_MOVED_ASIDE=0
 }
 
 cleanup_on_exit() {
@@ -222,15 +229,17 @@ compute_sha256() {
 
   if command -v sha256sum >/dev/null 2>&1; then
     checksum_output="$(sha256sum "$checksum_file" 2>/dev/null)" || return 1
+    checksum_hash="$(printf '%s\n' "$checksum_output" | awk '{ print $1 }')"
   elif command -v shasum >/dev/null 2>&1; then
     checksum_output="$(shasum -a 256 "$checksum_file" 2>/dev/null)" || return 1
+    checksum_hash="$(printf '%s\n' "$checksum_output" | awk '{ print $1 }')"
   elif command -v openssl >/dev/null 2>&1; then
     checksum_output="$(openssl dgst -sha256 "$checksum_file" 2>/dev/null)" || return 1
+    checksum_hash="$(printf '%s\n' "$checksum_output" | awk '{ print $NF }')"
   else
     return 2
   fi
 
-  checksum_hash="$(printf '%s\n' "$checksum_output" | awk '{ print $NF }')"
   case "$checksum_hash" in
     *[!A-Fa-f0-9]*|'') return 1 ;;
   esac
@@ -301,9 +310,7 @@ install_archive() {
     cleanup_install_artifacts
     return 1
   }
-  NEXT_INSTALL_DIR="${INSTALL_DIR}.new.$$"
-  OLD_INSTALL_DIR="${INSTALL_DIR}.old.$$"
-  INSTALL_MOVED_ASIDE=0
+  NEXT_INSTALL_DIR="${INSTALL_DIR}/.new.$$"
 
   download_to_file "$archive_url" "$ARCHIVE_TMP" 300 || {
     cleanup_install_artifacts
@@ -333,6 +340,10 @@ install_archive() {
     cleanup_install_artifacts
     return 1
   }
+  if ! mkdir -p "$INSTALL_DIR" || ! chmod go-w "$INSTALL_DIR"; then
+    cleanup_install_artifacts
+    return 1
+  fi
   rm -rf "$NEXT_INSTALL_DIR" || {
     cleanup_install_artifacts
     return 1
@@ -365,34 +376,13 @@ install_archive() {
     esac
   fi
 
-  if [ -e "$INSTALL_DIR" ] || [ -L "$INSTALL_DIR" ]; then
-    mv "$INSTALL_DIR" "$OLD_INSTALL_DIR" || {
-      cleanup_install_artifacts
-      return 1
-    }
-    INSTALL_MOVED_ASIDE=1
-  fi
-
-  if ! mv "$NEXT_INSTALL_DIR" "$INSTALL_DIR"; then
-    if [ "$INSTALL_MOVED_ASIDE" -eq 1 ]; then
-      mv "$OLD_INSTALL_DIR" "$INSTALL_DIR" 2>/dev/null || :
-      if [ -e "$INSTALL_DIR" ] || [ -L "$INSTALL_DIR" ]; then
-        INSTALL_MOVED_ASIDE=0
-      fi
-    fi
+  # The archive contains only this binary. Replace it with one same-filesystem
+  # rename, leaving the directory and command links available to cached callers.
+  # Readers can execute either complete version; there is no missing-file window.
+  mv -f "$NEXT_INSTALL_DIR/$BINARY_NAME" "$NUTRIENT_CLI" || {
     cleanup_install_artifacts
     return 1
-  fi
-  NEXT_INSTALL_DIR=""
-
-  if [ "$INSTALL_MOVED_ASIDE" -eq 1 ]; then
-    rm -rf "$OLD_INSTALL_DIR" || {
-      cleanup_install_artifacts
-      return 1
-    }
-  fi
-  OLD_INSTALL_DIR=""
-  INSTALL_MOVED_ASIDE=0
+  }
 
   cleanup_install_artifacts
 }
@@ -429,6 +419,12 @@ acquire_install_lock() {
       fi
     fi
 
+    # Only a first install needs to wait for the updater. A cached command can
+    # run safely while the replacement is downloaded and atomically installed.
+    if have_installed_binary; then
+      return 1
+    fi
+
     lock_attempts=$((lock_attempts + 1))
     if [ "$lock_attempts" -ge 60 ]; then
       return 1
@@ -453,14 +449,22 @@ release_is_older() {
 }
 
 refresh_if_needed() {
-  mkdir -p "$STATE_DIR" "$INSTALL_DIR" || {
-    echo "Failed to create install directories" >&2
+  mkdir -p "$STATE_DIR" || {
+    echo "Failed to create state directory" >&2
     exit 1
   }
-  chmod go-w "$STATE_DIR" "$INSTALL_DIR" || {
-    echo "Failed to secure install directory permissions" >&2
+  chmod go-w "$STATE_DIR" || {
+    echo "Failed to secure state directory permissions" >&2
     exit 1
   }
+
+  if ! acquire_install_lock; then
+    if have_installed_binary; then
+      return 0
+    fi
+    echo "Timed out waiting for install lock: $INSTALL_LOCK_PATH" >&2
+    exit 1
+  fi
 
   now="$(date +%s)" || {
     echo "Failed to read the current time" >&2
@@ -473,6 +477,20 @@ refresh_if_needed() {
       ;;
   esac
   load_state
+  INSTALL_READY=0
+
+  if [ -e "$INSTALL_DIR" ] || [ -L "$INSTALL_DIR" ]; then
+    chmod go-w "$INSTALL_DIR" || {
+      echo "Failed to secure install directory permissions" >&2
+      exit 1
+    }
+  fi
+
+  # Account commands check the release channel whenever no updater is active.
+  # The dispatch guard below also rejects an incompatible cached binary.
+  if [ "$FORCE_FRESHNESS_CHECK" -eq 1 ]; then
+    LAST_CHECKED_AT=""
+  fi
 
   if have_installed_binary; then
     INSTALL_READY=1
@@ -487,11 +505,13 @@ refresh_if_needed() {
   fi
 
   if [ "$INSTALL_READY" -eq 1 ] && [ "$should_check" -eq 0 ]; then
+    release_install_lock_or_exit
     return 0
   fi
 
   latest_release_id="$(fetch_latest_release_id)" || {
     if [ "$INSTALL_READY" -eq 1 ]; then
+      release_install_lock_or_exit
       return 0
     fi
     echo "Failed to fetch latest pdf-to-markdown release id" >&2
@@ -504,43 +524,40 @@ refresh_if_needed() {
   fi
 
   if [ "$INSTALL_READY" -eq 1 ] && [ "$latest_release_id" = "$RELEASE_ID" ]; then
-    write_state "$now" "$latest_release_id" || return 1
+    if ! write_state "$now" "$latest_release_id"; then
+      release_install_lock_or_exit
+      return 1
+    fi
+    release_install_lock_or_exit
     return 0
   fi
 
   latest_archive_url="$(archive_url_for_release "$latest_release_id")" || {
     if [ "$INSTALL_READY" -eq 1 ]; then
+      release_install_lock_or_exit
       return 0
     fi
     echo "Failed to build archive URL for release $latest_release_id" >&2
     exit 1
   }
 
-  if ! acquire_install_lock; then
-    if have_installed_binary; then
-      echo "Install lock busy; continuing with existing binary: $INSTALL_LOCK_PATH" >&2
-      return 0
-    fi
-    echo "Timed out waiting for install lock: $INSTALL_LOCK_PATH" >&2
-    exit 1
-  fi
-
   install_status=0
   install_archive "$latest_archive_url" || install_status=$?
-  if ! release_install_lock; then
-    echo "Failed to release install lock: $INSTALL_LOCK_PATH" >&2
-    exit 1
-  fi
 
   if [ "$install_status" -ne 0 ]; then
     if have_installed_binary; then
+      release_install_lock_or_exit
       return 0
     fi
     echo "Failed to install pdf-to-markdown archive for $TARGET_ID" >&2
     exit 1
   fi
 
-  write_state "$now" "$latest_release_id" || return 1
+  if ! write_state "$now" "$latest_release_id"; then
+    release_install_lock_or_exit
+    return 1
+  fi
+  release_install_lock_or_exit
 }
 
 refresh_if_needed
@@ -549,14 +566,15 @@ if ! selected_binary_exists "$NUTRIENT_CLI"; then
   echo "Binary not found or install is incomplete: $NUTRIENT_CLI" >&2
   exit 1
 fi
+# END SHARED INSTALL WRAPPER
 
-# nutrient 1.1.0+ is multi-call: it reads its verb from argv[0]'s basename
-# (pdf-to-markdown / pdf-to-text / self-update). Pin the verb explicitly by
-# exec'ing a `pdf-to-markdown` symlink next to the platform binary, instead of
+# nutrient 1.1.0+ is multi-call: it reads its command from argv[0]'s basename.
+# Pin the command explicitly by exec'ing a `pdf-to-markdown` symlink next to
+# the platform binary, instead of
 # relying on the binary's default-to-markdown behavior when invoked under its
 # platform name. Pre-1.1.0 binaries without verb dispatch fall back to
 # positional argv, preserving the old behavior.
-VERB_LINK="${INSTALL_DIR}/pdf-to-markdown"
+VERB_LINK="${INSTALL_DIR}/${VERB_NAME}"
 
 verb_link_is_valid() {
   [ -e "$VERB_LINK" ] || return 1
@@ -569,10 +587,21 @@ verb_link_is_valid() {
 
   case "$(uname -s)" in
     MINGW*|MSYS*|CYGWIN*)
-      # shellcheck disable=SC3013 # this branch only runs under Git Bash/Cygwin, where sh is bash and supports -nt
+      # Git Bash can emulate symlinks with copies. Compare their contents:
+      # a replacement binary can have an older timestamp than an existing copy.
       [ -z "$verb_link_target" ] &&
-        [ ! "$NUTRIENT_CLI" -nt "$VERB_LINK" ]
+        cmp -s "$NUTRIENT_CLI" "$VERB_LINK"
       ;;
+    *) return 1 ;;
+  esac
+}
+
+cached_verb_link_is_usable() {
+  verb_link_is_valid && return 0
+  case "$(uname -s)" in
+    # Windows may refuse to replace a running command copy. It remains usable
+    # until it exits; a subsequent invocation will update it.
+    MINGW*|MSYS*|CYGWIN*) [ -f "$VERB_LINK" ] && [ ! -L "$VERB_LINK" ] && [ -x "$VERB_LINK" ] ;;
     *) return 1 ;;
   esac
 }
@@ -583,20 +612,33 @@ if ! verb_link_is_valid; then
   if ! ln -s "$BINARY_NAME" "$VERB_LINK_TMP"; then
     rm -f "$VERB_LINK_TMP" || :
     VERB_LINK_TMP=""
-    if ! verb_link_is_valid; then
+    if ! cached_verb_link_is_usable; then
       echo "Failed to create command link: $VERB_LINK" >&2
       exit 1
     fi
   elif ! mv -f "$VERB_LINK_TMP" "$VERB_LINK"; then
     rm -f "$VERB_LINK_TMP" || :
     VERB_LINK_TMP=""
-    if ! verb_link_is_valid; then
+    if ! cached_verb_link_is_usable; then
       echo "Failed to install command link: $VERB_LINK" >&2
       exit 1
     fi
   else
     VERB_LINK_TMP=""
   fi
+fi
+
+supports_nutrient_auth() {
+  auth_help="$("$VERB_LINK" auth --help 2>/dev/null)" || return 1
+  case "$auth_help" in
+    *" auth login"*" auth status"*" auth logout"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+if [ "$VERB_NAME" = "nutrient" ] && ! supports_nutrient_auth; then
+  echo "The installed Nutrient CLI does not support account commands. Connect to the internet and retry so it can be updated." >&2
+  exit 1
 fi
 
 exec "$VERB_LINK" "$@"

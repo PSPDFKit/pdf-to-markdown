@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0 — 2026-09-04
+
+- Revised the license for unlimited free Standard conversion and `query`, permitted noncompetitive SaaS integrations, and separately licensed OEM distribution.
+- Added Vision access through free and paid account plans that include Vision; existing Nutrient CLI license-key workflows remain supported under their applicable agreements.
+- Clarified existing-agreement treatment, privacy protections, and contractual terms.
+- Added the `nutrient` entry point and `nutrient auth login`, `status`, and `logout` workflows.
+- Added account and API-key integration, offline entitlement handling, and usage reporting to both conversion commands.
+- Fixed release-download verification on macOS and Linux. Cached commands keep working while the CLI updates.
+
 ## 0.5.1 — 2026-07-23
 
 - Allow npm installation on Windows by adding `win32` to the package OS list
