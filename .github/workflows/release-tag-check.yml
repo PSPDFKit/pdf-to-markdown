@@ -1,9 +1,7 @@
 name: Release tag check
 
-# npm publish and GitHub tagging are both manual on this repo. This check
-# fails when the version in package.json is live on npm but has no matching
-# v<version> git tag, so a published release can't silently go untagged.
-# The daily schedule catches publishes that happen without a push to main.
+# The Buildkite release pipeline publishes and tags the same commit. This
+# independent check also catches incomplete releases and manual publications.
 
 on:
   push:

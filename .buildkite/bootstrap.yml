@@ -1,0 +1,8 @@
+# Initial pipeline configuration stored in Buildkite.
+steps:
+  - label: "Upload npm release pipeline"
+    if: build.branch == "main" && build.pull_request.id == null && (build.source == "ui" || build.source == "api")
+    agents:
+      linux: true
+      queue: inexpensive-jobs
+    command: "buildkite-agent pipeline upload .buildkite/pipeline.yml"
