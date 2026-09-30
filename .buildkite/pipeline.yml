@@ -1,8 +1,9 @@
-# Register this as a manual-only pipeline; see docs/releasing.md.
+# Loaded by the Buildkite-stored bootstrap after checking the release commit.
+env:
+  BUILDKITE_CLEAN_CHECKOUT: "true"
 steps:
   - label: "Validate and pack npm release"
     key: prepare-npm
-    if: build.branch == "main" && build.pull_request.id == null && (build.source == "ui" || build.source == "api")
     agents:
       queue: default
       linux: true
@@ -14,18 +15,9 @@ steps:
       - ".release-build/manifest.json"
       - ".release-build/summary.md"
 
-  - block: "Publish tested package to npm"
-    key: approve-npm
-    depends_on: prepare-npm
-    if: build.branch == "main" && build.pull_request.id == null && (build.source == "ui" || build.source == "api")
-    prompt: "Review the version, commit, and integrity in the release summary before approving publication to the public npm registry."
-
   - label: "Publish, verify, and tag npm release"
     key: publish-npm
-    depends_on:
-      - prepare-npm
-      - approve-npm
-    if: build.branch == "main" && build.pull_request.id == null && (build.source == "ui" || build.source == "api")
+    depends_on: prepare-npm
     agents:
       queue: default
       linux: true

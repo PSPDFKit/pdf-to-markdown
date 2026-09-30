@@ -1,8 +1,19 @@
-# Initial pipeline configuration stored in Buildkite.
+# Copy this configuration into Buildkite; do not load it from the selected commit.
+env:
+  BUILDKITE_CLEAN_CHECKOUT: "true"
 steps:
   - label: "Upload npm release pipeline"
     if: build.branch == "main" && build.pull_request.id == null && (build.source == "ui" || build.source == "api")
     agents:
       linux: true
       queue: inexpensive-jobs
-    command: "buildkite-agent pipeline upload .buildkite/pipeline.yml"
+    command: |
+      set -euo pipefail
+      release_commit="$(git rev-parse HEAD)"
+      test "$release_commit" = "$BUILDKITE_COMMIT"
+      git fetch --no-tags https://github.com/PSPDFKit/pdf-to-markdown.git main
+      if ! git merge-base --is-ancestor "$release_commit" FETCH_HEAD; then
+        echo 'The release commit must belong to main.' >&2
+        exit 1
+      fi
+      buildkite-agent pipeline upload .buildkite/pipeline.yml

@@ -36,6 +36,7 @@ jobs:
         run: |
           bash -n ci/npm-release.sh
           node --check ci/release.mjs
+          node --check ci/smoke.mjs
           node --test ci/release.test.mjs
 
       - name: Lint release runner

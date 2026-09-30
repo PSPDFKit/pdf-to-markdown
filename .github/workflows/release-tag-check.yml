@@ -54,7 +54,7 @@ jobs:
 
           echo "FAIL: $name@$version is published on npm but tag v$version does not exist."
           echo
-          echo "Tag the merge commit that shipped $version and cut a release:"
-          echo "  git tag v$version <sha> && git push origin v$version"
-          echo "  gh release create v$version --title 'v$version — ...' --notes '...'"
+          echo "Retry the publish job in the original Buildkite release build."
+          echo "It verifies the published tarball before creating the missing tag."
+          echo "For a manual publication, confirm its source commit before tagging."
           exit 1
