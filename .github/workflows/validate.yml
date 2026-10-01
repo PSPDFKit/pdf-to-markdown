@@ -32,6 +32,12 @@ jobs:
       - name: Check shell syntax
         run: npm run check
 
+      - name: Check release scripts
+        run: |
+          node --check ci/release.mjs
+          node --check ci/smoke.mjs
+          node --test ci/release.test.mjs
+
       - name: Test cached commands during updates
         run: npm test
 
