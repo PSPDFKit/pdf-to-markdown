@@ -1,6 +1,6 @@
 name: Release tag check
 
-# The Buildkite release pipeline publishes and tags the same commit. This
+# The Publish npm package workflow publishes and tags the same commit. This
 # independent check also catches incomplete releases and manual publications.
 
 on:
@@ -54,7 +54,7 @@ jobs:
 
           echo "FAIL: $name@$version is published on npm but tag v$version does not exist."
           echo
-          echo "Retry the publish job in the original Buildkite release build."
+          echo "Re-run the failed publish job in the original Publish npm package workflow run."
           echo "It verifies the published tarball before creating the missing tag."
           echo "For a manual publication, confirm its source commit before tagging."
           exit 1

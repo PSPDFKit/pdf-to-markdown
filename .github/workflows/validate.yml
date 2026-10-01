@@ -34,14 +34,9 @@ jobs:
 
       - name: Check release scripts
         run: |
-          bash -n ci/npm-release.sh
           node --check ci/release.mjs
           node --check ci/smoke.mjs
           node --test ci/release.test.mjs
-
-      - name: Lint release runner
-        if: runner.os == 'Linux'
-        run: shellcheck -s bash ci/npm-release.sh
 
       - name: Test cached commands during updates
         run: npm test

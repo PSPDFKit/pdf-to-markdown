@@ -131,9 +131,9 @@ test('annotated tags resolve to the underlying commit', async () => {
 });
 
 test('GitHub reads and writes use authentication; npm reads do not receive that token', async t => {
-  const previous = process.env.RELEASE_GITHUB_TOKEN;
-  process.env.RELEASE_GITHUB_TOKEN = 'test-token-not-a-credential';
-  t.after(() => { if (previous === undefined) delete process.env.RELEASE_GITHUB_TOKEN; else process.env.RELEASE_GITHUB_TOKEN = previous; });
+  const previous = process.env.GITHUB_TOKEN;
+  process.env.GITHUB_TOKEN = 'test-token-not-a-credential';
+  t.after(() => { if (previous === undefined) delete process.env.GITHUB_TOKEN; else process.env.GITHUB_TOKEN = previous; });
   t.mock.method(globalThis, 'fetch', async (url, options) => {
     assert.equal(options.headers.Authorization, url.startsWith(GITHUB) ? 'Bearer test-token-not-a-credential' : undefined);
     return {ok: true, json: async () => ({})};
@@ -186,68 +186,17 @@ test('command failures without stderr still have an error message', () => {
   assert.throws(() => command(process.execPath, ['-e', 'process.exit(1)']), /failed \(1\): no output/);
 });
 
-function runnerFixture(t) {
-  const temporary = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'npm-runner-test-')));
-  t.after(() => fs.rmSync(temporary, {recursive: true, force: true}));
-  const bin = path.join(temporary, 'bin');
-  const events = path.join(temporary, 'events');
-  fs.mkdirSync(bin);
-  fs.mkdirSync(path.join(temporary, '.release-build'));
-  fs.writeFileSync(path.join(temporary, '.release-build/package.tgz'), 'test');
-  fs.writeFileSync(path.join(temporary, '.release-build/summary.md'), 'test');
-  for (const name of ['git', 'docker', 'buildkite-agent', 'op']) {
-    fs.writeFileSync(path.join(bin, name), `#!${process.execPath}
-const fs = require('node:fs');
-const args = process.argv.slice(2);
-fs.appendFileSync(process.env.EVENTS, JSON.stringify({name: '${name}', args,
-  npm: !!process.env.NODE_AUTH_TOKEN, github: !!process.env.RELEASE_GITHUB_TOKEN}) + '\\n');
-if ('${name}' === 'git' && args[0] === 'rev-parse') console.log('${sha}');
-if ('${name}' === 'git' && args[0] === 'merge-base') process.exit(Number(process.env.ANCESTRY_EXIT || 0));
-if ('${name}' === 'op') console.log('dummy-test-token');
-if ('${name}' === 'buildkite-agent' && args[0] === 'redactor') fs.readFileSync(0);
-`, {mode: 0o755});
-  }
-  const env = {...process.env, PATH: `${bin}${path.delimiter}${process.env.PATH}`, EVENTS: events,
-    BUILDKITE_COMMIT: sha, NODE_AUTH_TOKEN: 'must-not-reach-preparation', RELEASE_GITHUB_TOKEN: 'must-not-reach-preparation'};
-  return {temporary, env, events: () => fs.readFileSync(events, 'utf8').trim().split('\n').map(JSON.parse)};
-}
-
-test('stored bootstrap rejects off-main commits before uploading repository steps', t => {
-  const f = runnerFixture(t);
-  const yaml = fs.readFileSync(path.join(root, '.buildkite/bootstrap.yml'), 'utf8');
-  const script = yaml.split('    command: |\n')[1].split('\n').map(line => line.replace(/^      /, '')).join('\n');
-  const run = exit => spawnSync('bash', ['-c', script], {cwd: f.temporary, env: {...f.env, ANCESTRY_EXIT: String(exit)}});
-  assert.equal(run(1).status, 1);
-  assert.equal(f.events().some(event => event.name === 'buildkite-agent'), false);
-  assert.equal(run(0).status, 0);
-  assert.deepEqual(f.events().at(-1).args, ['pipeline', 'upload', '.buildkite/pipeline.yml']);
+test('command failures redact GitHub and OIDC request tokens', t => {
+  const overrides = {GITHUB_TOKEN: 'fake-github-secret', ACTIONS_ID_TOKEN_REQUEST_TOKEN: 'fake-oidc-secret'};
+  const previous = Object.fromEntries(Object.keys(overrides).map(key => [key, process.env[key]]));
+  Object.assign(process.env, overrides);
+  t.after(() => { for (const [key, value] of Object.entries(previous)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; } });
+  assert.throws(() => command(process.execPath, ['-e',
+    'console.error(process.env.GITHUB_TOKEN, process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN); process.exit(1)']),
+  /failed \(1\): \[redacted\] \[redacted\]/);
 });
 
-test('runner isolates smoke inputs and only passes credentials to publishing', t => {
-  const f = runnerFixture(t);
-  const script = path.join(root, 'ci/npm-release.sh');
-  const prepare = spawnSync('bash', [script, 'prepare'], {cwd: f.temporary, env: f.env, encoding: 'utf8'});
-  assert.equal(prepare.status, 0, prepare.stderr);
-  const containers = f.events().filter(event => event.name === 'docker');
-  assert.equal(containers.length, 2);
-  assert.ok(containers.every(event => !event.npm && !event.github));
-  const mounts = containers[1].args.filter((_, index, args) => args[index - 1] === '--volume');
-  assert.deepEqual(mounts, [`${f.temporary}/ci/smoke.mjs:/smoke.mjs:ro`, `${f.temporary}/.release-build/package.tgz:/package.tgz:ro`]);
-  assert.ok(!f.events().some(event => event.name === 'op'));
-
-  fs.writeFileSync(path.join(f.temporary, 'events'), '');
-  const publish = spawnSync('bash', [script, 'publish'], {cwd: f.temporary, env: f.env, encoding: 'utf8'});
-  assert.equal(publish.status, 0, publish.stderr);
-  const events = f.events();
-  assert.equal(events.filter(event => event.name === 'git').length, 1);
-  assert.equal(events.filter(event => event.args[0] === 'redactor').length, 2);
-  assert.equal(events.at(-1).name, 'docker');
-  assert.ok(events.at(-1).npm && events.at(-1).github);
-  assert.ok(events.at(-1).args.includes(`${f.temporary}:/work:ro`));
-  assert.ok(!events.flatMap(event => event.args).some(arg => arg.includes('dummy-test-token')));
-});
-
-test('publish entry point checks the real artifact, invokes npm and tags using fake services', async t => {
+test('publish entry point requires OIDC, preserves its environment and tags using fake services', async t => {
   t.mock.method(console, 'log', () => {});
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'npm-publish-test-'));
   t.after(() => fs.rmSync(temporary, {recursive: true, force: true}));
@@ -263,14 +212,21 @@ test('publish entry point checks the real artifact, invokes npm and tags using f
 const fs = require('node:fs');
 const args = process.argv.slice(2);
 if (args[0] === 'publish') {
-  require('node:assert/strict').equal(process.env.RELEASE_GITHUB_TOKEN, '');
+  const assert = require('node:assert/strict');
+  assert.equal(process.env.GITHUB_TOKEN, '');
+  assert.equal(process.env.NODE_AUTH_TOKEN, '');
+  assert.equal(process.env.NPM_TOKEN, '');
+  assert.equal(process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN, 'fake-oidc-token');
+  assert.equal(process.env.ACTIONS_ID_TOKEN_REQUEST_URL, 'https://example.invalid/oidc');
+  assert.equal(process.env.NPM_CONFIG_USERCONFIG, '/dev/null');
   fs.writeFileSync(${JSON.stringify(path.join(temporary, 'published'))}, JSON.stringify(args));
 } else {
   require('node:child_process').execFileSync(${JSON.stringify(npm)}, args, {stdio: 'inherit'});
 }
 `, {mode: 0o755});
-  const overrides = {PATH: `${bin}${path.delimiter}${process.env.PATH}`, BUILDKITE_COMMIT: sha,
-    NODE_AUTH_TOKEN: 'fake-npm-token', RELEASE_GITHUB_TOKEN: 'fake-github-token'};
+  const overrides = {PATH: `${bin}${path.delimiter}${process.env.PATH}`, GITHUB_SHA: sha,
+    GITHUB_TOKEN: 'fake-github-token', ACTIONS_ID_TOKEN_REQUEST_TOKEN: '', ACTIONS_ID_TOKEN_REQUEST_URL: '',
+    NODE_AUTH_TOKEN: '', NPM_TOKEN: ''};
   const previous = Object.fromEntries(Object.keys(overrides).map(key => [key, process.env[key]]));
   Object.assign(process.env, overrides);
   t.after(() => { for (const [key, value] of Object.entries(previous)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; } });
@@ -286,6 +242,11 @@ if (args[0] === 'publish') {
       url.startsWith(REGISTRY) && live ? {dist: {integrity: artifact.integrity}} : null;
     return {ok: !!body, status: body ? 200 : 404, json: async () => body};
   });
+  await assert.rejects(main('publish', temporary), /id-token: write/);
+  assert.equal(tagged, false);
+  assert.equal(fs.existsSync(path.join(temporary, 'published')), false);
+  process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN = 'fake-oidc-token';
+  process.env.ACTIONS_ID_TOKEN_REQUEST_URL = 'https://example.invalid/oidc';
   await main('publish', temporary);
   assert.equal(tagged, true);
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(temporary, 'published'))), [

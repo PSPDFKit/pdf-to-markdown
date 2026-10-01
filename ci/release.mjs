@@ -17,7 +17,7 @@ export function command(program, args, options = {}) {
   });
   if (result.error || result.status !== 0) {
     let output = `${result.stdout || ''}\n${result.stderr || ''}`;
-    for (const value of [process.env.NODE_AUTH_TOKEN, process.env.RELEASE_GITHUB_TOKEN]) {
+    for (const value of [process.env.GITHUB_TOKEN, process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN]) {
       if (value) output = output.replaceAll(value, '[redacted]');
     }
     throw new Error(`${program} failed (${result.status ?? result.error?.code}): ${output.trim().slice(-4000) || result.error?.message || 'no output'}`);
@@ -41,12 +41,12 @@ export function integrity(bytes) {
 
 export async function request(url, {method = 'GET', body, missing = false} = {}) {
   const github = new URL(url).origin === 'https://api.github.com';
-  if (github) assert.ok(process.env.RELEASE_GITHUB_TOKEN, 'GitHub token is missing');
+  if (github) assert.ok(process.env.GITHUB_TOKEN, 'GitHub token is missing');
   const response = await fetch(url, {
     method, redirect: 'error', signal: AbortSignal.timeout(20_000),
     headers: {
       Accept: 'application/json', 'User-Agent': 'pdf-to-markdown-release',
-      ...(github ? {Authorization: `Bearer ${process.env.RELEASE_GITHUB_TOKEN}`} : {}),
+      ...(github ? {Authorization: `Bearer ${process.env.GITHUB_TOKEN}`} : {}),
       ...(body ? {'Content-Type': 'application/json'} : {}),
     },
     ...(body ? {body: JSON.stringify(body)} : {}),
@@ -129,8 +129,8 @@ export async function publishRelease(manifest, {publish, read = request, sleep =
 
 export async function main(action, root = process.cwd()) {
   assert.ok(['prepare', 'publish'].includes(action), 'Expected prepare or publish');
-  const commit = process.env.BUILDKITE_COMMIT;
-  assert.match(commit || '', /^[0-9a-f]{40}$/, 'Buildkite must supply the release commit');
+  const commit = process.env.GITHUB_SHA;
+  assert.match(commit || '', /^[0-9a-f]{40}$/, 'GitHub Actions must supply the release commit');
   const directory = path.join(root, '.release-build');
   if (action === 'prepare') {
     command('npm', ['run', 'check'], {cwd: root});
@@ -143,17 +143,17 @@ export async function main(action, root = process.cwd()) {
     return;
   }
   const manifest = readManifest(root, commit);
-  assert.ok(process.env.NODE_AUTH_TOKEN, 'npm publishing token is missing');
-  assert.ok(process.env.RELEASE_GITHUB_TOKEN, 'GitHub tagging token is missing');
+  assert.ok(process.env.GITHUB_TOKEN, 'GitHub tagging token is missing');
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'npm-publish-'));
   try {
-    const config = path.join(temporary, 'npmrc');
-    fs.writeFileSync(config, '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}\n', {mode: 0o600});
     await publishRelease(manifest, {publish: async () => {
+      assert.ok(process.env.ACTIONS_ID_TOKEN_REQUEST_URL && process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN,
+        'npm trusted publishing requires a GitHub-hosted job with id-token: write');
       command('npm', ['publish', path.join(directory, manifest.filename), '--access', 'public',
         '--tag', 'latest', '--ignore-scripts', '--registry', 'https://registry.npmjs.org'], {
-        env: {...process.env, NPM_CONFIG_USERCONFIG: config, NPM_CONFIG_CACHE: temporary,
-          NPM_CONFIG_LOGS_MAX: '0', RELEASE_GITHUB_TOKEN: ''},
+        // Keep the OIDC request variables; npm exchanges them for publish credentials.
+        env: {...process.env, NPM_CONFIG_USERCONFIG: '/dev/null', NPM_CONFIG_CACHE: temporary,
+          NPM_CONFIG_LOGS_MAX: '0', GITHUB_TOKEN: '', NODE_AUTH_TOKEN: '', NPM_TOKEN: ''},
       });
     }});
   } finally {
